@@ -99,6 +99,37 @@ class ProjectListNotifier extends Notifier<List<Project>> {
           project,
     ];
   }
+
+  void addComment(
+    String projectId,
+    String stageId,
+    String taskId,
+    String comment,
+  ) {
+    state = [
+      for (final project in state)
+        if (project.id == projectId)
+          project.copyWith(
+            stages: [
+              for (final stage in project.stages)
+                if (stage.id == stageId)
+                  stage.copyWith(
+                    tasks: [
+                      for (final task in stage.tasks)
+                        if (task.id == taskId)
+                          task.copyWith(comments: [...task.comments, comment])
+                        else
+                          task,
+                    ],
+                  )
+                else
+                  stage,
+            ],
+          )
+        else
+          project,
+    ];
+  }
 }
 
 final projectListProvider =

@@ -120,6 +120,37 @@ class StageDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                // Inside the bottom sheet Column
+                const Divider(),
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            hintText: 'Add a comment...',
+                            border: OutlineInputBorder(),
+                          ),
+                          onSubmitted: (value) {
+                            if (value.isNotEmpty) {
+                              ref
+                                  .read(projectListProvider.notifier)
+                                  .addComment(
+                                    projectId,
+                                    stageId,
+                                    task.id,
+                                    value,
+                                  );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           );
