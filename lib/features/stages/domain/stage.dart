@@ -5,17 +5,15 @@ import '../../tasks/domain/task.dart';
 class Stage {
   final String id;
   final String title;
-  final String description;
-  final DateTime startDate;
-  final DateTime dueDate;
+  final String? description;
+  final DateTime? dueDate;
   final List<Task> tasks;
 
   const Stage({
     required this.id,
     required this.title,
-    required this.description,
-    required this.startDate,
-    required this.dueDate,
+    this.description,
+    this.dueDate,
     this.tasks = const [],
   });
 
@@ -30,7 +28,6 @@ class Stage {
       id: id,
       title: title ?? this.title,
       description: description ?? this.description,
-      startDate: startDate ?? this.startDate,
       dueDate: dueDate ?? this.dueDate,
       tasks: tasks ?? this.tasks,
     );

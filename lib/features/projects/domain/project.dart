@@ -6,13 +6,13 @@ import '../../stages/domain/stage.dart';
 class Project {
   final String id;
   final String title;
-  final String description;
+  final String? description;
   final List<Stage> stages;
 
   const Project({
     required this.id,
     required this.title,
-    required this.description,
+    this.description,
     this.stages = const [],
   });
 
