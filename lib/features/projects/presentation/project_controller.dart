@@ -66,10 +66,6 @@ class ProjectListNotifier extends Notifier<List<Project>> {
     ];
   }
 
-  void addProject(Project project) {
-    state = [...state, project];
-  }
-
   void toggleTaskStatus(String projectId, String stageId, String taskId) {
     state = [
       for (final project in state)
@@ -129,6 +125,17 @@ class ProjectListNotifier extends Notifier<List<Project>> {
         else
           project,
     ];
+  }
+
+  void addProject(String title, String description) {
+    final newProject = Project(
+      id: DateTime.now().toString(),
+      title: title,
+      description: description,
+      stages: [],
+    );
+
+    state = [...state, newProject];
   }
 }
 
