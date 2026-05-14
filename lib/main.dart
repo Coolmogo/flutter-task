@@ -10,27 +10,27 @@ void main() {
   runApp(const ProviderScope(child: TaskApp()));
 }
 
-// We define our routes here
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const ProjectListScreen(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: ProjectListScreen()),
       routes: [
         GoRoute(
           path: 'project/:projectId',
-          builder: (context, state) {
+          pageBuilder: (context, state) {
             final id = state.pathParameters['projectId']!;
-            return ProjectDetailScreen(projectId: id);
+            return NoTransitionPage(child: ProjectDetailScreen(projectId: id));
           },
           routes: [
             GoRoute(
-              path: 'stage/:stageId',
-              builder: (Context, state) {
-                return StageDetailScreen(
-                  projectId: state.pathParameters['projectId']!,
-                  stageId: state.pathParameters['stageId']!,
+              path: 'board',
+              pageBuilder: (context, state) {
+                final id = state.pathParameters['projectId']!;
+                return NoTransitionPage(
+                  child: StageDetailScreen(projectId: id),
                 );
               },
             ),
