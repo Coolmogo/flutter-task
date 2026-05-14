@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'project_controller.dart';
 import 'package:go_router/go_router.dart';
+import 'project_controller.dart';
+import '../domain/project.dart';
+import '../../stages/domain/stage.dart';
 
 class ProjectDetailScreen extends ConsumerWidget {
   final String projectId;
@@ -11,49 +13,150 @@ class ProjectDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final projects = ref.watch(projectListProvider);
 
-    final project = projects.firstWhere((p) => p.id == projectId);
+    // Find the specific project
+    final project = projects.firstWhere(
+      (p) => p.id == projectId,
+      orElse: () => throw Exception('Project not found'),
+    );
 
     return Scaffold(
-      appBar: AppBar(title: Text(project.title)),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: const Color(0xFFF4F5F7),
+      body: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              project.description,
-              style: const TextStyle(fontSize: 18),
-            ),
-          ),
-          const Divider(),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Stages',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
+          _buildSidebar(context), // Reuse your sidebar!
           Expanded(
-            child: ListView.builder(
-              itemCount: project.stages.length,
-              itemBuilder: (context, index) {
-                final stage = project.stages[index];
-                return ListTile(
-                  leading: const Icon(Icons.layers),
-                  title: Text(stage.title),
-                  subtitle: Text(
-                    'Due: ${stage.dueDate.toString().split(' ')[0]}',
+            child: Column(
+              children: [
+                _buildHeader(context, project),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildOverviewSection(context, project),
+                        const SizedBox(height: 40),
+                        _buildStagesSection(context, project),
+                      ],
+                    ),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    context.go('/project/$projectId/stage/${stage.id}');
-                  },
-                );
-              },
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  // --- Header ---
+  Widget _buildHeader(BuildContext context, Project project) {
+    return Container(
+      height: 80,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 40),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/project/$projectId/board'),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            project.title,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          ElevatedButton(
+            onPressed: () {}, // Logic for editing project
+            child: const Text('Edit Project'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Overview Section ---
+  Widget _buildOverviewSection(BuildContext context, Project project) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Description',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          project.description,
+          style: TextStyle(fontSize: 16, color: Colors.grey[800], height: 1.5),
+        ),
+      ],
+    );
+  }
+
+  // --- Stages Section ---
+  Widget _buildStagesSection(BuildContext context, Project project) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Project Stages',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        // Grid of Stages
+        Wrap(
+          spacing: 20,
+          runSpacing: 20,
+          children: project.stages
+              .map((stage) => _buildStageCard(context, stage))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStageCard(BuildContext context, Stage stage) {
+    return Container(
+      width: 250,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            stage.title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${stage.tasks.length} Tasks',
+            style: const TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          LinearProgressIndicator(
+            value: 0.5, // We can calculate actual progress later!
+            backgroundColor: Colors.grey[200],
+            color: const Color(0xFF0052CC),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () {
+              // This is where we go to the Kanban Board!
+              // Note: We'll update this navigation in a second
+            },
+            child: const Text('View Board'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebar(BuildContext context) {
+    return Container(width: 240, color: const Color(0xFF0747A6));
   }
 }
