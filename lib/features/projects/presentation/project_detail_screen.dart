@@ -59,7 +59,7 @@ class ProjectDetailScreen extends ConsumerWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go('/project/$projectId/board'),
+            onPressed: () => context.go('/'),
           ),
           const SizedBox(width: 16),
           Text(
@@ -145,10 +145,7 @@ class ProjectDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () {
-              // This is where we go to the Kanban Board!
-              // Note: We'll update this navigation in a second
-            },
+            onPressed: () => context.go('/project/$projectId/board'),
             child: const Text('View Board'),
           ),
         ],
