@@ -30,14 +30,12 @@ class ProjectListNotifier extends Notifier<List<Project>> {
             title: 'Discovery & Requirements',
             description:
                 'Gather business requirements, conduct stakeholder interviews, and define project scope.',
-            startDate: DateTime.now(),
             dueDate: DateTime.now().add(const Duration(days: 7)),
             tasks: [
               Task(
                 id: 'TASK-301',
                 title: 'Define Data Models',
                 description: 'Create Project, Stage, and Task classes',
-                startDate: DateTime.now(),
                 dueDate: DateTime.now().add(const Duration(days: 2)),
                 status: 'In Progress',
                 assignee: john,
@@ -51,7 +49,6 @@ class ProjectListNotifier extends Notifier<List<Project>> {
                 title: 'Frontend Development',
                 description:
                     'Build the new customer support portal interface using React and implement responsive layouts for desktop and mobile devices.',
-                startDate: DateTime.now(),
                 dueDate: DateTime.now().add(const Duration(days: 5)),
                 status: 'In Progress',
                 assignee: james,
@@ -136,6 +133,60 @@ class ProjectListNotifier extends Notifier<List<Project>> {
     );
 
     state = [...state, newProject];
+  }
+
+  void moveTask({
+    required String projectId,
+    required String fromStageId,
+    required String toStageId,
+    required String taskId,
+  }) {
+    state = [
+      for (final project in state)
+        if (project.id == projectId)
+          project.copyWith(
+            stages: [
+              for (final stage in project.stages)
+                if (stage.id == fromStageId)
+                  stage.copyWith(
+                    tasks: stage.tasks.where((t) => t.id != taskId).toList(),
+                  )
+                else if (stage.id == toStageId)
+                  stage.copyWith(
+                    tasks: [
+                      ...stage.tasks,
+                      project.stages
+                          .firstWhere((s) => s.id == fromStageId)
+                          .tasks
+                          .firstWhere((t) => t.id == taskId),
+                    ],
+                  )
+                else
+                  stage,
+            ],
+          )
+        else
+          project,
+    ];
+  }
+
+  void addStage(String projectId, String stageTitle) {
+    state = [
+      for (final project in state)
+        if (project.id == projectId)
+          project.copyWith(
+            stages: [
+              ...project.stages,
+              Stage(
+                id: DateTime.now().toString(),
+                title: stageTitle,
+                tasks: [],
+              ),
+            ],
+          )
+        else
+          project,
+    ];
   }
 }
 

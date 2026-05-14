@@ -87,7 +87,7 @@ class ProjectDetailScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          project.description,
+          project.description ?? 'No description provided.',
           style: TextStyle(fontSize: 16, color: Colors.grey[800], height: 1.5),
         ),
       ],
