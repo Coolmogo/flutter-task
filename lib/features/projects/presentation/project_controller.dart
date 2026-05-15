@@ -6,6 +6,7 @@ import '../domain/project.dart';
 import '../../stages/domain/stage.dart';
 import '../../tasks/domain/task.dart';
 import '../../users/domain/user.dart';
+import '../../auth/project_auth_controller.dart';
 
 const List<User> sampleUsers = [
   User(id: 'john', name: 'John Robert', email: 'john@sample.com'),
@@ -306,3 +307,21 @@ final projectListProvider =
     NotifierProvider<ProjectListNotifier, List<Project>>(() {
       return ProjectListNotifier();
     });
+
+final myTasksProvider = Provider<List<Task>>((ref) {
+  final currentUser = ref.watch(authProvider);
+  final allProjects = ref.watch(projectListProvider);
+
+  if (currentUser == null) return [];
+
+  List<Task> myTasks = [];
+  for (var project in allProjects) {
+    for (var stage in project.stages) {
+      final tasksForMe = stage.tasks.where(
+        (task) => task.assignee?.id == currentUser.id,
+      );
+      myTasks.addAll(tasksForMe);
+    }
+  }
+  return myTasks;
+});
