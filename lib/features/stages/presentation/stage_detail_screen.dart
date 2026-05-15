@@ -5,48 +5,59 @@ import '../domain/stage.dart';
 import '../../tasks/domain/task.dart';
 import '../../projects/presentation/project_controller.dart';
 import '../../../shared/widgets/app_sidebar.dart';
+import '../../tasks/presentation/task_detail_drawer.dart';
 
-class StageDetailScreen extends ConsumerWidget {
+class StageDetailScreen extends ConsumerStatefulWidget {
   final String projectId;
   const StageDetailScreen({super.key, required this.projectId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StageDetailScreen> createState() => _StageDetailScreenState();
+}
+
+class _StageDetailScreenState extends ConsumerState<StageDetailScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Task? _selectedTask;
+  String? _selectedStageId;
+
+  @override
+  Widget build(BuildContext context) {
     final projects = ref.watch(projectListProvider);
 
     final project = projects.firstWhere(
-      (p) => p.id == projectId,
+      (p) => p.id == widget.projectId,
       orElse: () => Project(id: '', title: 'Not Found'),
     );
 
     if (project.id.isEmpty) {
-      return const Scaffold(body: Center(child: Text("Project not found")));
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F7),
+      key: _scaffoldKey,
+      endDrawer: _selectedTask != null
+          ? TaskDetailDrawer(
+              projectId: widget.projectId,
+              stageId: _selectedStageId!,
+              task: _selectedTask!,
+            )
+          : const Drawer(child: SizedBox.shrink()),
       body: Row(
         children: [
           const AppSidebar(),
           Expanded(
             child: Column(
               children: [
-                _buildBoardHeader(context, project),
+                _buildBoardHeader(project),
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(20),
                     scrollDirection: Axis.horizontal,
                     itemCount: project.stages.length + 1,
                     itemBuilder: (context, index) {
                       if (index == project.stages.length) {
-                        return _buildAddStageButton(context, ref, project.id);
+                        return _buildAddStageButton(project.id);
                       }
-                      return _buildKanbanColumn(
-                        context,
-                        ref,
-                        project,
-                        project.stages[index],
-                      );
+                      return _buildKanbanColumn(project, project.stages[index]);
                     },
                   ),
                 ),
@@ -58,17 +69,13 @@ class StageDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildKanbanColumn(
-    BuildContext context,
-    WidgetRef ref,
-    Project project,
-    Stage stage,
-  ) {
+  // --- HELPER METHODS (Moved inside the State class) ---
+
+  Widget _buildKanbanColumn(Project project, Stage stage) {
     return DragTarget<Task>(
       onWillAcceptWithDetails: (details) => true,
       onAcceptWithDetails: (details) {
         final droppedTask = details.data;
-
         final fromStageId = _findCurrentStageId(project, droppedTask.id);
 
         if (fromStageId == stage.id) return;
@@ -97,44 +104,16 @@ class StageDetailScreen extends ConsumerWidget {
           ),
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Text(
-                      stage.title.toUpperCase(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: Color(0xFF5E6C84),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    CircleAvatar(
-                      radius: 10,
-                      backgroundColor: Colors.white,
-                      child: Text(
-                        '${stage.tasks.length}',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildColumnHeader(stage),
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   itemCount: stage.tasks.length,
-                  itemBuilder: (context, index) => _buildTaskCard(
-                    context,
-                    ref,
-                    project.id,
-                    stage.id,
-                    stage.tasks[index],
-                  ),
+                  itemBuilder: (context, index) =>
+                      _buildTaskCard(project.id, stage.id, stage.tasks[index]),
                 ),
               ),
-              _buildCreateTaskButton(context, ref, project.id, stage.id),
+              _buildCreateTaskButton(project.id, stage.id),
             ],
           ),
         );
@@ -142,13 +121,34 @@ class StageDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTaskCard(
-    BuildContext context,
-    WidgetRef ref,
-    String pId,
-    String sId,
-    Task task,
-  ) {
+  Widget _buildColumnHeader(Stage stage) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          Text(
+            stage.title.toUpperCase(),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Color(0xFF5E6C84),
+            ),
+          ),
+          const SizedBox(width: 8),
+          CircleAvatar(
+            radius: 10,
+            backgroundColor: Colors.white,
+            child: Text(
+              '${stage.tasks.length}',
+              style: const TextStyle(fontSize: 10),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskCard(String pId, String sId, Task task) {
     return Draggable<Task>(
       data: task,
       feedback: Material(
@@ -157,123 +157,112 @@ class StageDetailScreen extends ConsumerWidget {
         color: Colors.transparent,
         child: SizedBox(
           width: 300,
-          child: _buildTaskCardContent(task, isDragging: true),
+          child: _buildTaskCardContent(task, pId, sId, isDragging: true),
         ),
       ),
       childWhenDragging: Opacity(
         opacity: 0.3,
-        child: _buildTaskCardContent(task),
+        child: _buildTaskCardContent(task, pId, sId),
       ),
-      child: _buildTaskCardContent(task),
+      child: _buildTaskCardContent(task, pId, sId),
     );
   }
 
-  Widget _buildTaskCardContent(Task task, {bool isDragging = false}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+  Widget _buildTaskCardContent(
+    Task task,
+    String pId,
+    String sId, {
+    bool isDragging = false,
+  }) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 8),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
+        side: BorderSide(
           color: isDragging ? const Color(0xFF0052CC) : Colors.grey.shade300,
           width: isDragging ? 2 : 1,
         ),
-        boxShadow: isDragging
-            ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)]
-            : null,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title
-          Text(
-            task.title,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-          ),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedTask = task;
+            _selectedStageId = sId;
+          });
 
-          // Description (Nullable check)
-          if (task.description != null && task.description!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              task.description!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-            ),
-          ],
-
-          const SizedBox(height: 16),
-
-          // Footer (Date & Assignee)
-          Row(
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _scaffoldKey.currentState?.openEndDrawer();
+            }
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (task.dueDate != null) ...[
-                const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
-                const SizedBox(width: 4),
+              Text(
+                task.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              if (task.description != null && task.description!.isNotEmpty) ...[
+                const SizedBox(height: 8),
                 Text(
-                  '${task.dueDate!.day}/${task.dueDate!.month}',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  task.description!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
-              const Spacer(),
-              if (task.assignee != null)
-                CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.blue.shade100,
-                  child: Text(
-                    task.assignee!.name[0].toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  if (task.dueDate != null) ...[
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 12,
+                      color: Colors.grey,
                     ),
-                  ),
-                ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${task.dueDate!.day}/${task.dueDate!.month}',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                  const Spacer(),
+                  if (task.assignee != null)
+                    CircleAvatar(
+                      radius: 10,
+                      backgroundColor: Colors.blue.shade100,
+                      child: Text(
+                        task.assignee!.name[0].toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // --- Helper Widgets ---
-  Widget _buildMoveMenu(
-    BuildContext context,
-    WidgetRef ref,
-    String pId,
-    String sId,
-    Task task,
-  ) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_horiz, size: 16),
-      onSelected: (targetId) => ref
-          .read(projectListProvider.notifier)
-          .moveTask(
-            projectId: pId,
-            fromStageId: sId,
-            toStageId: targetId,
-            taskId: task.id,
-          ),
-      itemBuilder: (context) {
-        final project = ref
-            .read(projectListProvider)
-            .firstWhere((p) => p.id == pId);
-        return project.stages
-            .where((s) => s.id != sId)
-            .map(
-              (s) =>
-                  PopupMenuItem(value: s.id, child: Text('Move to ${s.title}')),
-            )
-            .toList();
-      },
-    );
-  }
+  // --- Other Helpers ---
 
-  Widget _buildAddStageButton(BuildContext context, WidgetRef ref, String pId) {
+  Widget _buildAddStageButton(String pId) {
     return Container(
       width: 280,
       margin: const EdgeInsets.only(right: 20),
       child: TextButton.icon(
-        onPressed: () => _showAddStageDialog(context, ref, pId),
+        onPressed: () => _showAddStageDialog(pId),
         icon: const Icon(Icons.add),
         label: const Text("Add another list"),
         style: TextButton.styleFrom(
@@ -287,16 +276,11 @@ class StageDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCreateTaskButton(
-    BuildContext context,
-    WidgetRef ref,
-    String pId,
-    String sId,
-  ) {
+  Widget _buildCreateTaskButton(String pId, String sId) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextButton.icon(
-        onPressed: () => _showAddTaskDialog(context, ref, pId, sId),
+        onPressed: () => _showAddTaskDialog(pId, sId),
         icon: const Icon(Icons.add, size: 18),
         label: const Text("Create Issue"),
         style: TextButton.styleFrom(foregroundColor: const Color(0xFF42526E)),
@@ -304,7 +288,7 @@ class StageDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBoardHeader(BuildContext context, Project project) {
+  Widget _buildBoardHeader(Project project) {
     return Container(
       padding: const EdgeInsets.all(20),
       color: Colors.white,
@@ -321,8 +305,7 @@ class StageDetailScreen extends ConsumerWidget {
     );
   }
 
-  // --- Dialogs ---
-  void _showAddStageDialog(BuildContext context, WidgetRef ref, String pId) {
+  void _showAddStageDialog(String pId) {
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -344,23 +327,31 @@ class StageDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddTaskDialog(
-    BuildContext context,
-    WidgetRef ref,
-    String pId,
-    String sId,
-  ) {
+  void _showAddTaskDialog(String pId, String sId) {
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('New Task'),
-        content: TextField(controller: controller, autofocus: true),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: "What needs to be done?"),
+        ),
         actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
-              ref.read(projectListProvider.notifier);
-              Navigator.pop(context);
+              if (controller.text.isNotEmpty) {
+                // Now this will work!
+                ref
+                    .read(projectListProvider.notifier)
+                    .addTask(pId, sId, controller.text);
+                Navigator.pop(context);
+              }
             },
             child: const Text('Create'),
           ),

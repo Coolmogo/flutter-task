@@ -30,15 +30,17 @@ class ProjectDetailScreen extends ConsumerWidget {
               children: [
                 _buildHeader(context, project),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildOverviewSection(context, project),
-                        const SizedBox(height: 40),
-                        _buildStagesSection(context, project),
-                      ],
+                  child: SizedBox.expand(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildOverviewSection(context, project),
+                          const SizedBox(height: 40),
+                          _buildStagesSection(context, project, ref),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -96,7 +98,11 @@ class ProjectDetailScreen extends ConsumerWidget {
   }
 
   // --- Stages Section ---
-  Widget _buildStagesSection(BuildContext context, Project project) {
+  Widget _buildStagesSection(
+    BuildContext context,
+    Project project,
+    WidgetRef ref,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -109,9 +115,13 @@ class ProjectDetailScreen extends ConsumerWidget {
         Wrap(
           spacing: 20,
           runSpacing: 20,
-          children: project.stages
-              .map((stage) => _buildStageCard(context, stage))
-              .toList(),
+          children: [
+            ...project.stages
+                .map((stage) => _buildStageCard(context, stage))
+                .toList(),
+
+            _buildAddStageCard(context, ref, project.id),
+          ],
         ),
       ],
     );
@@ -148,6 +158,77 @@ class ProjectDetailScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => context.go('/project/$projectId/board'),
             child: const Text('View Board'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddStageCard(BuildContext context, WidgetRef ref, String pId) {
+    return InkWell(
+      onTap: () => _showAddStageDialog(context, ref, pId),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 250,
+        height: 180, // Matches approximate height of your stage cards
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            style: BorderStyle.solid,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_circle_outline,
+              color: Colors.grey.shade600,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add New Stage',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddStageDialog(BuildContext context, WidgetRef ref, String pId) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Create New Stage'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'e.g. Quality Assurance, Backlog...',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                ref
+                    .read(projectListProvider.notifier)
+                    .addStage(pId, controller.text);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Create'),
           ),
         ],
       ),
