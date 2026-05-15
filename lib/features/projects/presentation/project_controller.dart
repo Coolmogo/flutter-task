@@ -4,19 +4,18 @@ import '../../stages/domain/stage.dart';
 import '../../tasks/domain/task.dart';
 import '../../users/domain/user.dart';
 
+const List<User> sampleUsers = [
+  User(id: 'john', name: 'John Robert', email: 'john@sample.com'),
+  User(id: 'james', name: 'James Albert', email: 'james@sample.com'),
+];
+
+final teamProvider = Provider<List<User>>((ref) => sampleUsers);
+
 class ProjectListNotifier extends Notifier<List<Project>> {
   @override
   List<Project> build() {
-    const john = User(
-      id: 'john',
-      name: 'John Robert',
-      email: 'john@sample.com',
-    );
-    const james = User(
-      id: 'james',
-      name: 'James Albert',
-      email: 'james@sample.com',
-    );
+    final john = sampleUsers[0];
+    final james = sampleUsers[1];
 
     return [
       Project(
@@ -182,6 +181,92 @@ class ProjectListNotifier extends Notifier<List<Project>> {
                 title: stageTitle,
                 tasks: [],
               ),
+            ],
+          )
+        else
+          project,
+    ];
+  }
+
+  void updateTask(
+    String projectId,
+    String stageId,
+    String taskId, {
+    String? title,
+    String? description,
+    DateTime? dueDate,
+    User? assignee,
+  }) {
+    state = [
+      for (final project in state)
+        if (project.id == projectId)
+          project.copyWith(
+            stages: [
+              for (final stage in project.stages)
+                if (stage.id == stageId)
+                  stage.copyWith(
+                    tasks: [
+                      for (final task in stage.tasks)
+                        if (task.id == taskId)
+                          task.copyWith(
+                            title: title ?? task.title,
+                            description: description ?? task.description,
+                            dueDate: dueDate ?? task.dueDate,
+                            assignee: assignee ?? task.assignee,
+                          )
+                        else
+                          task,
+                    ],
+                  )
+                else
+                  stage,
+            ],
+          )
+        else
+          project,
+    ];
+  }
+
+  void addTask(String projectId, String stageId, String taskTitle) {
+    state = [
+      for (final project in state)
+        if (projectId == project.id)
+          project.copyWith(
+            stages: [
+              for (final stage in project.stages)
+                if (stageId == stage.id)
+                  stage.copyWith(
+                    tasks: [
+                      ...stage.tasks,
+                      Task(
+                        id: 'TASK-${DateTime.now().millisecondsSinceEpoch}',
+                        title: taskTitle,
+                        status: stage.title,
+                      ),
+                    ],
+                  )
+                else
+                  stage,
+            ],
+          )
+        else
+          project,
+    ];
+  }
+
+  void deleteTask(String projectId, String stageId, String taskId) {
+    state = [
+      for (final project in state)
+        if (projectId == project.id)
+          project.copyWith(
+            stages: [
+              for (final stage in project.stages)
+                if (stageId == stage.id)
+                  stage.copyWith(
+                    tasks: stage.tasks.where((t) => t.id != taskId).toList(),
+                  )
+                else
+                  stage,
             ],
           )
         else
