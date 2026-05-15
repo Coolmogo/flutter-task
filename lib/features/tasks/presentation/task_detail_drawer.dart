@@ -176,7 +176,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
 
             const Spacer(),
 
-            // --- 5. FOOTER ---
             Row(
               children: [
                 const Text('Status', style: TextStyle(color: Colors.grey)),
