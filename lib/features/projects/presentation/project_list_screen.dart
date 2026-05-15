@@ -107,13 +107,10 @@ class ProjectListScreen extends ConsumerWidget {
     );
   }
 
-  // --- Header Component ---
   Widget _buildWebHeader(BuildContext context, WidgetRef ref) {
     return PageHeader(
       title: 'All Projects',
-      breadcrumbs: [
-        BreadcrumbItem(label: 'Projects'), // Root level, no route needed
-      ],
+      breadcrumbs: [BreadcrumbItem(label: 'Projects')],
       actions: [
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
@@ -133,7 +130,6 @@ class ProjectListScreen extends ConsumerWidget {
     );
   }
 
-  // --- Project Card Component ---
   Widget _buildProjectCard(BuildContext context, dynamic project) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -214,7 +210,6 @@ class ProjectListScreen extends ConsumerWidget {
     );
   }
 
-  // --- Add Project Logic ---
   void _showAddProjectDialog(BuildContext context, WidgetRef ref) {
     final titleController = TextEditingController();
     final descController = TextEditingController();

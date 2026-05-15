@@ -54,19 +54,16 @@ class ProjectDetailScreen extends ConsumerWidget {
     );
   }
 
-  // Inside project_detail_screen.dart, replace _buildHeader with:
   Widget _buildHeader(BuildContext context, Project project) {
     return PageHeader(
       title: project.title,
       breadcrumbs: [
-        BreadcrumbItem(label: 'Projects', route: '/'), // Link back to list
+        BreadcrumbItem(label: 'Projects', route: '/'),
         BreadcrumbItem(label: project.title), // Current page
       ],
       actions: [
         OutlinedButton.icon(
-          onPressed: () {
-            /* Logic for editing */
-          },
+          onPressed: () {},
           icon: const Icon(Icons.edit_outlined, size: 18),
           label: const Text('Edit Project'),
           style: OutlinedButton.styleFrom(
@@ -78,7 +75,6 @@ class ProjectDetailScreen extends ConsumerWidget {
     );
   }
 
-  // --- Overview Section ---
   Widget _buildOverviewSection(BuildContext context, Project project) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +92,6 @@ class ProjectDetailScreen extends ConsumerWidget {
     );
   }
 
-  // --- Stages Section ---
   Widget _buildStagesSection(
     BuildContext context,
     Project project,
@@ -169,7 +164,7 @@ class ProjectDetailScreen extends ConsumerWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: 250,
-        height: 180, // Matches approximate height of your stage cards
+        height: 180,
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),

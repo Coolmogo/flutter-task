@@ -71,8 +71,6 @@ class _StageDetailScreenState extends ConsumerState<StageDetailScreen> {
     );
   }
 
-  // --- HELPER METHODS (Moved inside the State class) ---
-
   Widget _buildKanbanColumn(Project project, Stage stage) {
     return DragTarget<Task>(
       onWillAcceptWithDetails: (details) => true,
@@ -257,8 +255,6 @@ class _StageDetailScreenState extends ConsumerState<StageDetailScreen> {
     );
   }
 
-  // --- Other Helpers ---
-
   Widget _buildAddStageButton(String pId) {
     return Container(
       width: 280,
@@ -290,20 +286,15 @@ class _StageDetailScreenState extends ConsumerState<StageDetailScreen> {
     );
   }
 
-  // Inside stage_detail_screen.dart, replace your header method with:
   Widget _buildBoardHeader(Project project) {
     return PageHeader(
-      title: 'Kanban Board', // Or use project.title if preferred
+      title: 'Kanban Board',
       breadcrumbs: [
         BreadcrumbItem(label: 'Projects', route: '/'),
-        BreadcrumbItem(
-          label: project.title,
-          route: '/project/${project.id}',
-        ), // Link back to overview
+        BreadcrumbItem(label: project.title, route: '/project/${project.id}'),
         BreadcrumbItem(label: 'Board'), // Current page
       ],
       actions: [
-        // Example action: Toggle for board settings or filters
         IconButton(
           icon: const Icon(Icons.filter_list),
           onPressed: () {},
@@ -363,7 +354,6 @@ class _StageDetailScreenState extends ConsumerState<StageDetailScreen> {
           ElevatedButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
-                // Now this will work!
                 ref
                     .read(projectListProvider.notifier)
                     .addTask(pId, sId, controller.text);
