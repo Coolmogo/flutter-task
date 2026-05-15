@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/projects/presentation/project_controller.dart';
+import '../../features/auth/project_auth_controller.dart';
+import '../../features/users/domain/user.dart';
 
 class AppSidebar extends StatelessWidget {
   const AppSidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This looks at the URL to see where we are
     final String location = GoRouterState.of(context).uri.path;
-
-    // We are on the "Projects" tab if we're at home OR inside a project
     final bool isProjectsActive =
         location == '/' || location.startsWith('/project');
+    final bool isMyTaskActive = location == '/my-tasks';
+    final bool isTeam = location == '/team';
 
     return Container(
       width: 240,
@@ -50,12 +53,91 @@ class AppSidebar extends StatelessWidget {
             context,
             Icons.check_circle_outline,
             'My Tasks',
-            onTap: () {}, // Future feature
+            onTap: () => context.go('/my-tasks'),
           ),
-          _sidebarItem(context, Icons.people_outline, 'Team', onTap: () {}),
+          _sidebarItem(
+            context,
+            Icons.people_outline,
+            'Team',
+            onTap: () => context.go('/team'),
+          ),
 
           const Spacer(),
 
+          // --- NEW USER SWITCHER SECTION ---
+          Consumer(
+            builder: (context, ref, child) {
+              final currentUser = ref.watch(authProvider);
+              final team = ref.watch(teamProvider);
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  children: [
+                    if (currentUser != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Text(
+                          "Acting as: ${currentUser.name}",
+                          style: const TextStyle(
+                            color: Colors.white60,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<User>(
+                          isExpanded: true,
+                          value: currentUser,
+                          hint: const Text(
+                            "Select User",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                          dropdownColor: const Color(0xFF0747A6),
+                          icon: const Icon(
+                            Icons.swap_vert,
+                            color: Colors.white70,
+                            size: 18,
+                          ),
+                          items: team
+                              .map(
+                                (user) => DropdownMenuItem(
+                                  value: user,
+                                  child: Text(
+                                    user.name,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (user) {
+                            if (user != null) {
+                              ref.read(authProvider.notifier).login(user);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // --- END USER SWITCHER ---
           _sidebarItem(
             context,
             Icons.settings_outlined,
