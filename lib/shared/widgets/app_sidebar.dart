@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class AppSideBar extends StatelessWidget {
-  const AppSideBar({super.key});
+class AppSidebar extends StatelessWidget {
+  const AppSidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // This looks at the URL to see where we are
     final String location = GoRouterState.of(context).uri.path;
+
+    // We are on the "Projects" tab if we're at home OR inside a project
+    final bool isProjectsActive =
+        location == '/' || location.startsWith('/project');
 
     return Container(
       width: 240,
@@ -14,54 +19,85 @@ class AppSideBar extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 40),
-          const Icon(Icons.bolt, color: Colors.white, size: 40),
+          // Logo Area
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Icon(Icons.rocket_launch, color: Colors.white, size: 30),
+                SizedBox(width: 12),
+                Text(
+                  'TaskFlow',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 40),
 
-          _SidebarItem(
-            icon: Icons.grid_view_rounded,
-            label: 'Projects',
-            isActive: location == '/',
+          _sidebarItem(
+            context,
+            Icons.dashboard_outlined,
+            'Projects',
+            isSelected: isProjectsActive,
             onTap: () => context.go('/'),
           ),
-          _SidebarItem(
-            icon: Icons.settings,
-            label: 'Settings',
-            isActive: location.contains('/settings'),
-            onTap: () {}, // Future logic
+          _sidebarItem(
+            context,
+            Icons.check_circle_outline,
+            'My Tasks',
+            onTap: () {}, // Future feature
           ),
+          _sidebarItem(context, Icons.people_outline, 'Team', onTap: () {}),
+
+          const Spacer(),
+
+          _sidebarItem(
+            context,
+            Icons.settings_outlined,
+            'Settings',
+            isSelected: location.startsWith('/settings'),
+            onTap: () {},
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
-}
 
-class _SidebarItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _SidebarItem({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.white70),
-      title: Text(
-        label,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.white70,
-          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-        ),
+  Widget _sidebarItem(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    bool isSelected = false,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
       ),
-      onTap: onTap,
-      hoverColor: Colors.white.withOpacity(0.1),
-      selected: isActive,
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: isSelected ? Colors.white : Colors.white70,
+          size: 20,
+        ),
+        title: Text(
+          label,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        onTap: onTap,
+      ),
     );
   }
 }
