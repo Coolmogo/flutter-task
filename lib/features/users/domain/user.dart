@@ -1,33 +1,12 @@
-import 'package:flutter/foundation.dart';
-
-@immutable
 class User {
   final String id;
   final String name;
   final String? email;
-  final String? avatarUrl;
 
-  const User({
-    required this.id,
-    required this.name,
-    this.email,
-    this.avatarUrl,
-  });
+  const User({required this.id, required this.name, this.email});
 
-  User copyWith({String? name, String? email, String? avatarUrl}) {
-    return User(
-      id: id,
-      name: name ?? this.name,
-      email: email ?? this.email,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-    );
-  }
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'email': email};
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is User && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  factory User.fromJson(Map<String, dynamic> json) =>
+      User(id: json['id'], name: json['name'], email: json['email']);
 }

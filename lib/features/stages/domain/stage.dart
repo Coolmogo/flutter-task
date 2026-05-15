@@ -32,4 +32,20 @@ class Stage {
       tasks: tasks ?? this.tasks,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'dueDate': dueDate?.toIso8601String(),
+    'tasks': tasks.map((t) => t.toJson()).toList(),
+  };
+
+  factory Stage.fromJson(Map<String, dynamic> json) => Stage(
+    id: json['id'],
+    title: json['title'],
+    description: json['description'],
+    dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+    tasks: (json['tasks'] as List).map((t) => Task.fromJson(t)).toList(),
+  );
 }

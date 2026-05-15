@@ -38,4 +38,24 @@ class Task {
       comments: comments ?? this.comments,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'assignee': assignee?.toJson(),
+    'dueDate': dueDate?.toIso8601String(),
+    'status': status,
+    'comments': comments,
+  };
+
+  factory Task.fromJson(Map<String, dynamic> json) => Task(
+    id: json['id'],
+    title: json['title'],
+    description: json['description'],
+    assignee: json['assignee'] != null ? User.fromJson(json['assignee']) : null,
+    dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+    status: json['status'] ?? 'To Do',
+    comments: List<String>.from(json['comments'] ?? []),
+  );
 }

@@ -24,4 +24,18 @@ class Project {
       stages: stages ?? this.stages,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'stages': stages.map((s) => s.toJson()).toList(),
+  };
+
+  factory Project.fromJson(Map<String, dynamic> json) => Project(
+    id: json['id'],
+    title: json['title'],
+    description: json['description'],
+    stages: (json['stages'] as List).map((s) => Stage.fromJson(s)).toList(),
+  );
 }
