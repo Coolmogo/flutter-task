@@ -27,7 +27,7 @@ class StageDetailScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFF4F5F7),
       body: Row(
         children: [
-          const AppSideBar(),
+          const AppSidebar(),
           Expanded(
             child: Column(
               children: [

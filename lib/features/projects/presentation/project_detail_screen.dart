@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'project_controller.dart';
 import '../domain/project.dart';
+import '../../../shared/widgets/app_sidebar.dart';
 import '../../stages/domain/stage.dart';
 
 class ProjectDetailScreen extends ConsumerWidget {
@@ -23,7 +24,7 @@ class ProjectDetailScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFF4F5F7),
       body: Row(
         children: [
-          _buildSidebar(context), // Reuse your sidebar!
+          const AppSidebar(),
           Expanded(
             child: Column(
               children: [

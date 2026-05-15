@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../shared/widgets/app_sidebar.dart';
 import 'project_controller.dart';
 
 class ProjectListScreen extends ConsumerWidget {
@@ -14,7 +15,7 @@ class ProjectListScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFF4F5F7),
       body: Row(
         children: [
-          _buildSidebar(context),
+          const AppSidebar(),
 
           Expanded(
             child: Column(
@@ -46,43 +47,6 @@ class ProjectListScreen extends ConsumerWidget {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 240,
-      color: const Color(0xFF0747A6), // Deep Jira Blue
-      child: Column(
-        children: [
-          const SizedBox(height: 40),
-          // Logo Area
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Icon(Icons.rocket_launch, color: Colors.white, size: 30),
-                SizedBox(width: 12),
-                Text(
-                  'TaskFlow',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
-          _sidebarItem(Icons.dashboard_outlined, 'Projects', isSelected: true),
-          _sidebarItem(Icons.check_circle_outline, 'My Tasks'),
-          _sidebarItem(Icons.people_outline, 'Team'),
-          const Spacer(),
-          _sidebarItem(Icons.settings_outlined, 'Settings'),
-          const SizedBox(height: 20),
         ],
       ),
     );
