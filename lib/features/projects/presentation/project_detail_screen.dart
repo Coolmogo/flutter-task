@@ -5,6 +5,8 @@ import 'project_controller.dart';
 import '../domain/project.dart';
 import '../../../shared/widgets/app_sidebar.dart';
 import '../../stages/domain/stage.dart';
+import '../../../shared/widgets/page_header.dart';
+import '../../../shared/widgets/app_breadcrumbs.dart';
 
 class ProjectDetailScreen extends ConsumerWidget {
   final String projectId;
@@ -52,30 +54,27 @@ class ProjectDetailScreen extends ConsumerWidget {
     );
   }
 
-  // --- Header ---
+  // Inside project_detail_screen.dart, replace _buildHeader with:
   Widget _buildHeader(BuildContext context, Project project) {
-    return Container(
-      height: 80,
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go('/'),
+    return PageHeader(
+      title: project.title,
+      breadcrumbs: [
+        BreadcrumbItem(label: 'Projects', route: '/'), // Link back to list
+        BreadcrumbItem(label: project.title), // Current page
+      ],
+      actions: [
+        OutlinedButton.icon(
+          onPressed: () {
+            /* Logic for editing */
+          },
+          icon: const Icon(Icons.edit_outlined, size: 18),
+          label: const Text('Edit Project'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF42526E),
+            side: const BorderSide(color: Color(0xFFDFE1E6)),
           ),
-          const SizedBox(width: 16),
-          Text(
-            project.title,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: () {}, // Logic for editing project
-            child: const Text('Edit Project'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

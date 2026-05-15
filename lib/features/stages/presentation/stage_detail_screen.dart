@@ -6,6 +6,8 @@ import '../../tasks/domain/task.dart';
 import '../../projects/presentation/project_controller.dart';
 import '../../../shared/widgets/app_sidebar.dart';
 import '../../tasks/presentation/task_detail_drawer.dart';
+import '../../../shared/widgets/app_breadcrumbs.dart';
+import '../../../shared/widgets/page_header.dart';
 
 class StageDetailScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -288,20 +290,35 @@ class _StageDetailScreenState extends ConsumerState<StageDetailScreen> {
     );
   }
 
+  // Inside stage_detail_screen.dart, replace your header method with:
   Widget _buildBoardHeader(Project project) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      color: Colors.white,
-      child: Row(
-        children: [
-          Text(
-            project.title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return PageHeader(
+      title: 'Kanban Board', // Or use project.title if preferred
+      breadcrumbs: [
+        BreadcrumbItem(label: 'Projects', route: '/'),
+        BreadcrumbItem(
+          label: project.title,
+          route: '/project/${project.id}',
+        ), // Link back to overview
+        BreadcrumbItem(label: 'Board'), // Current page
+      ],
+      actions: [
+        // Example action: Toggle for board settings or filters
+        IconButton(
+          icon: const Icon(Icons.filter_list),
+          onPressed: () {},
+          tooltip: 'Filters',
+        ),
+        const SizedBox(width: 8),
+        CircleAvatar(
+          radius: 16,
+          backgroundColor: Colors.blue.shade800,
+          child: const Text(
+            'JD',
+            style: TextStyle(fontSize: 12, color: Colors.white),
           ),
-          const SizedBox(width: 20),
-          const Icon(Icons.star_border, size: 20, color: Colors.grey),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

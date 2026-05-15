@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/widgets/app_sidebar.dart';
 import 'project_controller.dart';
+import '../../../shared/widgets/app_breadcrumbs.dart';
+import '../../../shared/widgets/page_header.dart';
 
 class ProjectListScreen extends ConsumerWidget {
   const ProjectListScreen({super.key});
@@ -15,7 +16,7 @@ class ProjectListScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFF4F5F7),
       body: Row(
         children: [
-          const AppSidebar(),
+          _buildSidebar(context),
 
           Expanded(
             child: Column(
@@ -36,8 +37,7 @@ class ProjectListScreen extends ConsumerWidget {
                                 maxCrossAxisExtent: 350,
                                 mainAxisSpacing: 24,
                                 crossAxisSpacing: 24,
-                                mainAxisExtent:
-                                    200, // Fixed height for a uniform look
+                                mainAxisExtent: 200,
                               ),
                           itemCount: projects.length,
                           itemBuilder: (context, index) =>
@@ -47,6 +47,43 @@ class ProjectListScreen extends ConsumerWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebar(BuildContext context) {
+    return Container(
+      width: 240,
+      color: const Color(0xFF0747A6), // Deep Jira Blue
+      child: Column(
+        children: [
+          const SizedBox(height: 40),
+          // Logo Area
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Icon(Icons.rocket_launch, color: Colors.white, size: 30),
+                SizedBox(width: 12),
+                Text(
+                  'TaskFlow',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          _sidebarItem(Icons.dashboard_outlined, 'Projects', isSelected: true),
+          _sidebarItem(Icons.check_circle_outline, 'My Tasks'),
+          _sidebarItem(Icons.people_outline, 'Team'),
+          const Spacer(),
+          _sidebarItem(Icons.settings_outlined, 'Settings'),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -72,32 +109,27 @@ class ProjectListScreen extends ConsumerWidget {
 
   // --- Header Component ---
   Widget _buildWebHeader(BuildContext context, WidgetRef ref) {
-    return Container(
-      height: 80,
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Row(
-        children: [
-          const Text(
-            'All Projects',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const Spacer(),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0052CC),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+    return PageHeader(
+      title: 'All Projects',
+      breadcrumbs: [
+        BreadcrumbItem(label: 'Projects'), // Root level, no route needed
+      ],
+      actions: [
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF0052CC),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(3),
             ),
-            onPressed: () => _showAddProjectDialog(context, ref),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Create Project'),
           ),
-        ],
-      ),
+          onPressed: () => _showAddProjectDialog(context, ref),
+          icon: const Icon(Icons.add, size: 18),
+          label: const Text('Create Project'),
+        ),
+      ],
     );
   }
 
