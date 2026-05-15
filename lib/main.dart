@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:task_manager_flutter/features/users/presentation/team_screen.dart';
 import './features/projects/presentation/project_list_screen.dart';
 import './features/projects/presentation/project_detail_screen.dart';
 import './features/stages/presentation/stage_detail_screen.dart';
 import './features/tasks/presentation/my_tasks_screen.dart';
 
 void main() {
-  // ProviderScope is mandatory for Riverpod to work
   runApp(const ProviderScope(child: TaskApp()));
 }
 
@@ -43,6 +43,11 @@ final _router = GoRouter(
       path: '/my-tasks',
       pageBuilder: (context, state) =>
           const NoTransitionPage(child: MyTasksScreen()),
+    ),
+    GoRoute(
+      path: '/team',
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: TeamScreen()),
     ),
   ],
 );
