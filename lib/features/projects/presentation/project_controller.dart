@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/project.dart';
 import '../../stages/domain/stage.dart';
 import '../../tasks/domain/task.dart';
@@ -12,8 +15,44 @@ const List<User> sampleUsers = [
 final teamProvider = Provider<List<User>>((ref) => sampleUsers);
 
 class ProjectListNotifier extends Notifier<List<Project>> {
+  static const _storageKey = 'taskflow_data_v1';
+
   @override
   List<Project> build() {
+    _loadFromStorage();
+    return [];
+  }
+
+  Future<void> _loadFromStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_storageKey);
+
+    if (jsonString != null) {
+      try {
+        final List<dynamic> decoded = jsonDecode(jsonString);
+        state = decoded.map((item) => Project.fromJson(item)).toList();
+      } catch (e) {
+        debugPrint("Error decoding stored projects: $e");
+        state = _getInitialData();
+      }
+    } else {
+      state = _getInitialData();
+    }
+  }
+
+  Future<void> _saveToStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encoded = jsonEncode(state.map((p) => p.toJson()).toList());
+    await prefs.setString(_storageKey, encoded);
+  }
+
+  @override
+  set state(List<Project> value) {
+    super.state = value;
+    _saveToStorage();
+  }
+
+  List<Project> _getInitialData() {
     final john = sampleUsers[0];
     final james = sampleUsers[1];
 
@@ -26,7 +65,7 @@ class ProjectListNotifier extends Notifier<List<Project>> {
         stages: [
           Stage(
             id: 'STG-001',
-            title: 'Discovery & Requirements',
+            title: 'To-do',
             description:
                 'Gather business requirements, conduct stakeholder interviews, and define project scope.',
             dueDate: DateTime.now().add(const Duration(days: 7)),
@@ -36,23 +75,11 @@ class ProjectListNotifier extends Notifier<List<Project>> {
                 title: 'Define Data Models',
                 description: 'Create Project, Stage, and Task classes',
                 dueDate: DateTime.now().add(const Duration(days: 2)),
-                status: 'In Progress',
+                status: 'Discovery & Requirements',
                 assignee: john,
                 comments: [
                   'Almost done with the User model!',
                   'Started the Task model.',
-                ],
-              ),
-              Task(
-                id: 'TASK-302',
-                title: 'Frontend Development',
-                description:
-                    'Build the new customer support portal interface using React and implement responsive layouts for desktop and mobile devices.',
-                dueDate: DateTime.now().add(const Duration(days: 5)),
-                status: 'In Progress',
-                assignee: james,
-                comments: [
-                  'Initial component structure completed. Waiting on finalized UI assets from design team.',
                 ],
               ),
             ],
@@ -125,12 +152,11 @@ class ProjectListNotifier extends Notifier<List<Project>> {
 
   void addProject(String title, String description) {
     final newProject = Project(
-      id: DateTime.now().toString(),
+      id: 'PRJ-${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       description: description,
       stages: [],
     );
-
     state = [...state, newProject];
   }
 
@@ -157,7 +183,8 @@ class ProjectListNotifier extends Notifier<List<Project>> {
                       project.stages
                           .firstWhere((s) => s.id == fromStageId)
                           .tasks
-                          .firstWhere((t) => t.id == taskId),
+                          .firstWhere((t) => t.id == taskId)
+                          .copyWith(status: stage.title),
                     ],
                   )
                 else
@@ -177,7 +204,7 @@ class ProjectListNotifier extends Notifier<List<Project>> {
             stages: [
               ...project.stages,
               Stage(
-                id: DateTime.now().toString(),
+                id: 'STG-${DateTime.now().millisecondsSinceEpoch}',
                 title: stageTitle,
                 tasks: [],
               ),
