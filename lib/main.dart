@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import './features/projects/presentation/project_list_screen.dart';
 import './features/projects/presentation/project_detail_screen.dart';
 import './features/stages/presentation/stage_detail_screen.dart';
+import './features/tasks/presentation/my_tasks_screen.dart';
 
 void main() {
   // ProviderScope is mandatory for Riverpod to work
@@ -37,6 +38,11 @@ final _router = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: '/my-tasks',
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: MyTasksScreen()),
     ),
   ],
 );
