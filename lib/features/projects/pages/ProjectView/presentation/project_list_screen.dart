@@ -18,6 +18,21 @@ class ProjectListScreen extends ConsumerWidget {
     final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController();
     final descController = TextEditingController();
+    final codeController = TextEditingController();
+
+    // Auto-generate project code shorthand from title in real-time
+    titleController.addListener(() {
+      final text = titleController.text.trim();
+      final initials = text.split(' ').map((e) => e.isNotEmpty ? e[0].toUpperCase() : '').join();
+      final code = initials.isNotEmpty 
+          ? (initials.length > 5 ? initials.substring(0, 4) : initials)
+          : '';
+      codeController.text = code;
+      // Put cursor at end of input
+      codeController.selection = TextSelection.fromPosition(
+        TextPosition(offset: codeController.text.length),
+      );
+    });
 
     showDialog(
       context: context,
@@ -60,6 +75,30 @@ class ProjectListScreen extends ConsumerWidget {
                 validator: (value) => value == null || value.trim().isEmpty
                     ? 'Title is required'
                     : null,
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: codeController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Project Shorthand Code',
+                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                  hintText: 'e.g., MAB',
+                  hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5)),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Color(0xFF334155)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) return 'Code is required';
+                  if (value.trim().length < 2) return 'Code must be at least 2 characters';
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -108,6 +147,7 @@ class ProjectListScreen extends ConsumerWidget {
                     .addProject(
                       titleController.text.trim(),
                       descController.text.trim(),
+                      codeController.text.trim().toUpperCase(),
                     );
                 if (context.mounted) {
                   Navigator.pop(context);

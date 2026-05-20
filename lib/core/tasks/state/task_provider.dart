@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/domain/task_model.dart';
 import '../../../core/auth/auth_controller.dart'; // Verify path fits your auth file
 import '../../users/model/user_model.dart'; // Adjust path to User model if needed
+import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
+import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
 
 class TaskListNotifier extends AsyncNotifier<List<Task>> {
   static const _storageKey = 'taskflow_global_tasks_v1';
@@ -94,8 +96,46 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     state = const AsyncValue.loading();
     await Future.delayed(const Duration(milliseconds: 200));
 
+    String newTaskId = '';
+    if (projectId == null || projectId.isEmpty) {
+      int nextNum = 1;
+      for (final t in currentTasks) {
+        if (t.projectId == null || t.projectId!.isEmpty) {
+          final parts = t.id.split('-');
+          if (parts.length > 1) {
+            final parsed = int.tryParse(parts[parts.length - 1]);
+            if (parsed != null && parsed >= nextNum) {
+              nextNum = parsed + 1;
+            }
+          }
+        }
+      }
+      newTaskId = 'TASK-${nextNum.toString().padLeft(2, '0')}';
+    } else {
+      final projects = ref.read(projectListProvider).value ?? [];
+      final project = projects.firstWhere(
+        (p) => p.id == projectId,
+        orElse: () => const Project(id: '', title: '', projectCode: 'TASK'),
+      );
+      final code = project.projectCode.isNotEmpty ? project.projectCode : 'TASK';
+
+      int nextNum = 1;
+      for (final t in currentTasks) {
+        if (t.projectId == projectId) {
+          final parts = t.id.split('-');
+          if (parts.length > 1) {
+            final parsed = int.tryParse(parts[parts.length - 1]);
+            if (parsed != null && parsed >= nextNum) {
+              nextNum = parsed + 1;
+            }
+          }
+        }
+      }
+      newTaskId = '$code-$nextNum';
+    }
+
     final newTask = Task(
-      id: 'TASK-${DateTime.now().millisecondsSinceEpoch}',
+      id: newTaskId,
       title: title,
       description: description,
       projectId: projectId,
@@ -176,7 +216,8 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
         }
 
         // Return the fresh mutated task containing the new audit stamps
-        return task.copyWith(
+        return Task(
+          id: task.id,
           title: title ?? task.title,
           description: description ?? task.description,
           status: status ?? task.status,
@@ -184,8 +225,7 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
           projectId: projectId ?? task.projectId,
           dueDate: clearDueDate ? null : (dueDate ?? task.dueDate),
           assignee: clearAssignee ? null : (assignee ?? task.assignee),
-          activities:
-              internalAuditTrail, //  Binds updated history logs list right back here
+          activities: internalAuditTrail,
         );
       }
       return task;

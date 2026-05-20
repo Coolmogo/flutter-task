@@ -46,13 +46,14 @@ class ProjectListNotifier extends AsyncNotifier<List<Project>> {
   List<Project> _getInitialProjects() {
     return [
       Project(
-        id: 'PRJ-1042',
+        id: 'PRJ-01',
+        projectCode: 'CSP',
         title: 'Customer Support Portal Redesign',
         description:
             'Redesign and modernize the customer support portal to improve user experience, reduce ticket resolution time, and add self-service capabilities such as knowledge base search and live chat integration.',
         stages: [
           Stage(
-            id: 'STG-001',
+            id: 'STG-01',
             title:
                 'Stage 0', // The automated backlog/inbox stage requested by your boss!
             description: 'Project initialization backlog container.',
@@ -63,18 +64,32 @@ class ProjectListNotifier extends AsyncNotifier<List<Project>> {
     ];
   }
 
-  Future<void> addProject(String title, String description) async {
+  Future<void> addProject(String title, String description, String projectCode) async {
     final currentProjects = state.value ?? [];
     state = const AsyncValue.loading();
     await Future.delayed(const Duration(milliseconds: 400));
 
+    int nextNum = 1;
+    for (final p in currentProjects) {
+      final parts = p.id.split('-');
+      if (parts.length > 1) {
+        final parsed = int.tryParse(parts[1]);
+        if (parsed != null && parsed >= nextNum) {
+          nextNum = parsed + 1;
+        }
+      }
+    }
+    final formattedNum = nextNum.toString().padLeft(2, '0');
+    final newProjectId = 'PRJ-$formattedNum';
+
     final newProject = Project(
-      id: 'PRJ-${DateTime.now().millisecondsSinceEpoch}',
+      id: newProjectId,
+      projectCode: projectCode,
       title: title,
       description: description,
       stages: [
         Stage(
-          id: 'STG-${DateTime.now().millisecondsSinceEpoch}',
+          id: 'STG-01',
           title:
               'Stage 0', // Ensures EVERY project starts with at least 1 stage automatically!
           description: 'Default entry workflow sprint container.',
@@ -95,11 +110,22 @@ class ProjectListNotifier extends AsyncNotifier<List<Project>> {
 
     final updated = currentProjects.map((project) {
       if (project.id == projectId) {
+        int nextNum = 1;
+        for (final s in project.stages) {
+          final parts = s.id.split('-');
+          if (parts.length > 1) {
+            final parsed = int.tryParse(parts[1]);
+            if (parsed != null && parsed >= nextNum) {
+              nextNum = parsed + 1;
+            }
+          }
+        }
+        final newStageId = 'STG-${nextNum.toString().padLeft(2, '0')}';
         return project.copyWith(
           stages: [
             ...project.stages,
             Stage(
-              id: 'STG-${DateTime.now().millisecondsSinceEpoch}',
+              id: newStageId,
               title: stageTitle,
             ),
           ],
