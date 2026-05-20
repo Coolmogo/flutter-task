@@ -37,6 +37,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   DateTime? _selectedDueDate;
   User? _selectedAssignee;
   bool _shouldClearAssignee = false;
+  String? _selectedStatus;
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
     _descController.text = task.description ?? '';
     _selectedDueDate = task.dueDate;
     _selectedAssignee = task.assignee;
+    _selectedStatus = task.status;
     _lastTaskId = widget.taskId;
     _isInitialized = true;
     _hasChanges = false;
@@ -87,6 +89,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
           description: _descController.text.trim(),
           dueDate: _selectedDueDate,
           assignee: _selectedAssignee,
+          status: _selectedStatus,
           clearAssignee: _shouldClearAssignee,
         );
 
@@ -101,6 +104,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
       _descController.text = originalTask.description ?? '';
       _selectedDueDate = originalTask.dueDate;
       _selectedAssignee = originalTask.assignee;
+      _selectedStatus = originalTask.status;
       _hasChanges = false;
       _shouldClearAssignee = false;
     });
@@ -305,37 +309,42 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                 label: 'Status',
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
+                                    horizontal: 12,
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.primary.withOpacity(0.1),
+                                    color: Colors.black.withOpacity(0.01),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: AppTheme.primary.withOpacity(0.2),
+                                      color: AppTheme.border,
                                     ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 6,
-                                        height: 6,
-                                        decoration: const BoxDecoration(
-                                          color: AppTheme.primary,
-                                          shape: BoxShape.circle,
-                                        ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: _selectedStatus ?? task.status,
+                                      icon: const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.textSecondary),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppTheme.textPrimary,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        task.status,
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: AppTheme.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
+                                      dropdownColor: AppTheme.cardColor,
+                                      isDense: true,
+                                      items: ['To Do', 'In Progress', 'Done']
+                                          .map((status) => DropdownMenuItem(
+                                                value: status,
+                                                child: Text(status),
+                                              ))
+                                          .toList(),
+                                      onChanged: (val) {
+                                        if (val != null && val != (_selectedStatus ?? task.status)) {
+                                          setState(() {
+                                            _selectedStatus = val;
+                                            _hasChanges = true;
+                                          });
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
