@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:task_manager_flutter/features/users/presentation/team_screen.dart';
-import './features/projects/presentation/project_list_screen.dart';
-import './features/projects/presentation/project_detail_screen.dart';
-import './features/stages/presentation/stage_detail_screen.dart';
-import './features/tasks/presentation/my_tasks_screen.dart';
+import 'package:task_manager_flutter/core/users/presentation/team_screen.dart';
+import 'package:task_manager_flutter/features/projects/pages/ProjectView/presentation/project_list_screen.dart';
+import 'package:task_manager_flutter/features/projects/pages/EditProject/presentation/project_detail_screen.dart';
+import 'package:task_manager_flutter/features/projects/pages/EditProject/presentation/project_board_screen.dart';
+import 'package:task_manager_flutter/core/tasks/pages/MyTasks/presentation/my_tasks_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: TaskApp()));
@@ -31,7 +31,7 @@ final _router = GoRouter(
               pageBuilder: (context, state) {
                 final id = state.pathParameters['projectId']!;
                 return NoTransitionPage(
-                  child: StageDetailScreen(projectId: id),
+                  child: ProjectBoardScreen(projectId: id),
                 );
               },
             ),
