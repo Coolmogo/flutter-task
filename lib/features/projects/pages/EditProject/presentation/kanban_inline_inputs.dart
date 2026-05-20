@@ -54,11 +54,17 @@ class _InlineAddStageColumnState extends State<InlineAddStageColumn> {
           onTap: () => setState(() => _isEditing = true),
           decoration: AppTheme.glassCard(
             color: Colors.white.withOpacity(0.02),
-            border: Border.all(color: const Color(0xFF334155).withOpacity(0.3), width: 1),
+            border: Border.all(
+              color: const Color(0xFF334155).withOpacity(0.3),
+              width: 1,
+            ),
           ),
           hoverDecoration: AppTheme.glassCard(
             color: Colors.white.withOpacity(0.04),
-            border: Border.all(color: AppTheme.primary.withOpacity(0.4), width: 1),
+            border: Border.all(
+              color: AppTheme.primary.withOpacity(0.4),
+              width: 1,
+            ),
           ),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -96,10 +102,16 @@ class _InlineAddStageColumnState extends State<InlineAddStageColumn> {
             TextField(
               controller: _controller,
               autofocus: true,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.textPrimary,
+              ),
               decoration: InputDecoration(
                 hintText: 'Enter list title...',
-                hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5)),
+                hintStyle: TextStyle(
+                  color: AppTheme.textSecondary.withOpacity(0.5),
+                ),
                 border: InputBorder.none,
                 isDense: true,
               ),
@@ -175,11 +187,11 @@ class _InlineQuickAddTaskInputState extends State<InlineQuickAddTaskInput> {
           scale: 1.02,
           onTap: () => setState(() => _isCreating = true),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
           hoverDecoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
           child: const Padding(
@@ -189,7 +201,7 @@ class _InlineQuickAddTaskInputState extends State<InlineQuickAddTaskInput> {
                 Icon(Icons.add_rounded, size: 16, color: AppTheme.primary),
                 SizedBox(width: 8),
                 Text(
-                  'Add a card',
+                  'Add a task',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -209,7 +221,10 @@ class _InlineQuickAddTaskInputState extends State<InlineQuickAddTaskInput> {
         child: Container(
           decoration: AppTheme.glassCard(
             color: AppTheme.cardColor,
-            border: Border.all(color: AppTheme.primary.withOpacity(0.8), width: 1.5),
+            border: Border.all(
+              color: AppTheme.primary.withOpacity(0.8),
+              width: 1.5,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           padding: const EdgeInsets.all(12),
@@ -219,10 +234,15 @@ class _InlineQuickAddTaskInputState extends State<InlineQuickAddTaskInput> {
                 controller: _textController,
                 autofocus: true,
                 maxLines: null,
-                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppTheme.textPrimary,
+                ),
                 decoration: InputDecoration(
                   hintText: 'What needs to be done?',
-                  hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.4)),
+                  hintStyle: TextStyle(
+                    color: AppTheme.textSecondary.withOpacity(0.4),
+                  ),
                   border: InputBorder.none,
                   isDense: true,
                 ),

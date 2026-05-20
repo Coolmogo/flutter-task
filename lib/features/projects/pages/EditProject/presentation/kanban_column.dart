@@ -31,7 +31,8 @@ class KanbanColumn extends ConsumerWidget {
       onAcceptWithDetails: (details) {
         final droppedTask = details.data;
 
-        if (droppedTask.stageId == stage.id && droppedTask.status == columnName) {
+        if (droppedTask.stageId == stage.id &&
+            droppedTask.status == columnName) {
           return;
         }
 
@@ -55,8 +56,8 @@ class KanbanColumn extends ConsumerWidget {
                 : Colors.white.withOpacity(0.02),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isHovering 
-                  ? AppTheme.primary.withOpacity(0.6) 
+              color: isHovering
+                  ? AppTheme.primary.withOpacity(0.6)
                   : const Color(0xFF334155).withOpacity(0.4),
               width: isHovering ? 2.0 : 1.0,
             ),
@@ -65,8 +66,12 @@ class KanbanColumn extends ConsumerWidget {
             loading: () => const Center(
               child: CircularProgressIndicator(color: AppTheme.primary),
             ),
-            error: (err, stack) =>
-                Center(child: Text('Error loading tasks: $err', style: const TextStyle(color: Colors.redAccent))),
+            error: (err, stack) => Center(
+              child: Text(
+                'Error loading tasks: $err',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            ),
             data: (allTasks) {
               final columnTasks = allTasks
                   .where(
@@ -101,12 +106,14 @@ class KanbanColumn extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Divider(height: 1, color: const Color(0xFF334155).withOpacity(0.3)),
-                  InlineQuickAddTaskInput(
-                    projectId: project.id,
-                    stageId: stage.id,
-                    columnTitle: columnName,
-                  ),
+                  if (columnName.toLowerCase() == 'to do') ...[
+                    Divider(height: 1, color: const Color(0xFF334155)),
+                    InlineQuickAddTaskInput(
+                      projectId: project.id,
+                      stageId: stage.id,
+                      columnTitle: columnName,
+                    ),
+                  ],
                 ],
               );
             },
