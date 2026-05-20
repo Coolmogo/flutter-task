@@ -5,7 +5,7 @@ import 'package:task_manager_flutter/core/users/presentation/team_screen.dart';
 import 'package:task_manager_flutter/features/projects/pages/ProjectView/presentation/project_list_screen.dart';
 import 'package:task_manager_flutter/features/projects/pages/EditProject/presentation/project_detail_screen.dart';
 import 'package:task_manager_flutter/features/projects/pages/EditProject/presentation/project_board_screen.dart';
-import 'package:task_manager_flutter/core/tasks/pages/tasks_screen.dart';
+import 'package:task_manager_flutter/core/tasks/presentation/tasks_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: TaskApp()));

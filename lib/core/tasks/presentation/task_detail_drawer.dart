@@ -93,10 +93,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
     setState(() {
       _hasChanges = false;
     });
-
-    if (mounted) {
-      Navigator.pop(context);
-    }
   }
 
   void _cancelChanges(Task originalTask) {
@@ -120,12 +116,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
       backgroundColor: AppTheme.sidebarColor,
       child: Container(
         decoration: const BoxDecoration(
-          border: Border(
-            left: BorderSide(
-              color: AppTheme.border,
-              width: 1.5,
-            ),
-          ),
+          border: Border(left: BorderSide(color: AppTheme.border, width: 1.5)),
         ),
         child: tasksAsync.when(
           loading: () => const Center(
@@ -187,14 +178,20 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                 ),
                                 decoration: const InputDecoration(
                                   hintText: 'Task Title',
-                                  hintStyle: TextStyle(color: AppTheme.textSecondary),
+                                  hintStyle: TextStyle(
+                                    color: AppTheme.textSecondary,
+                                  ),
                                   border: InputBorder.none,
                                 ),
                               ),
                               const SizedBox(height: 24),
                               const Row(
                                 children: [
-                                  Icon(Icons.subject_rounded, size: 18, color: AppTheme.primary),
+                                  Icon(
+                                    Icons.subject_rounded,
+                                    size: 18,
+                                    color: AppTheme.primary,
+                                  ),
                                   SizedBox(width: 8),
                                   Text(
                                     'Description',
@@ -210,28 +207,45 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                               TextField(
                                 controller: _descController,
                                 maxLines: 5,
-                                style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13.5),
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontSize: 13.5,
+                                ),
                                 decoration: InputDecoration(
-                                  hintText: 'Add a more detailed description...',
-                                  hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5)),
+                                  hintText:
+                                      'Add a more detailed description...',
+                                  hintStyle: TextStyle(
+                                    color: AppTheme.textSecondary.withOpacity(
+                                      0.5,
+                                    ),
+                                  ),
                                   filled: true,
                                   fillColor: Colors.black.withOpacity(0.01),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: AppTheme.border.withOpacity(0.8)),
+                                    borderSide: BorderSide(
+                                      color: AppTheme.border.withOpacity(0.8),
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                                    borderSide: const BorderSide(
+                                      color: AppTheme.primary,
+                                      width: 1.5,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                               ),
                               const SizedBox(height: 36),
-                              
+
                               // Activity Section
                               const Row(
                                 children: [
-                                  Icon(Icons.chat_bubble_outline_rounded, size: 18, color: AppTheme.primary),
+                                  Icon(
+                                    Icons.chat_bubble_outline_rounded,
+                                    size: 18,
+                                    color: AppTheme.primary,
+                                  ),
                                   SizedBox(width: 8),
                                   Text(
                                     'Activity',
@@ -244,22 +258,22 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Segmented Control
                               _buildSegmentedTabController(),
                               const SizedBox(height: 16),
-                              
+
                               // Add Comment Inline Input
                               _buildCommentInput(task),
                               const SizedBox(height: 24),
-                              
+
                               // Feed Timeline
                               _buildActivityTimeline(task),
                             ],
                           ),
                         ),
                       ),
-                      
+
                       // VERTICAL SPLIT BORDER
                       Container(width: 1, color: AppTheme.border),
 
@@ -267,8 +281,13 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                       Expanded(
                         flex: 2,
                         child: Container(
-                          color: const Color(0xFFF8FAFC), // Crisp clean Slate-50 panel for metadata sidebar
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                          color: const Color(
+                            0xFFF8FAFC,
+                          ), // Crisp clean Slate-50 panel for metadata sidebar
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 32,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -285,11 +304,16 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                               _buildSidebarField(
                                 label: 'Status',
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppTheme.primary.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                                    border: Border.all(
+                                      color: AppTheme.primary.withOpacity(0.2),
+                                    ),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -325,7 +349,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                       context: context,
                                       initialDate: _selectedDueDate ?? now,
                                       firstDate: now,
-                                      lastDate: now.add(const Duration(days: 365 * 5)),
+                                      lastDate: now.add(
+                                        const Duration(days: 365 * 5),
+                                      ),
                                     );
                                     if (pickedDate != null) {
                                       setState(() {
@@ -336,22 +362,35 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                   },
                                   borderRadius: BorderRadius.circular(6),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.black.withOpacity(0.01),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: AppTheme.border),
+                                      border: Border.all(
+                                        color: AppTheme.border,
+                                      ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.calendar_today_rounded, size: 12, color: AppTheme.textSecondary),
+                                        const Icon(
+                                          Icons.calendar_today_rounded,
+                                          size: 12,
+                                          color: AppTheme.textSecondary,
+                                        ),
                                         const SizedBox(width: 8),
                                         Text(
                                           _selectedDueDate != null
                                               ? "${_selectedDueDate!.day}/${_selectedDueDate!.month}/${_selectedDueDate!.year}"
                                               : 'Set date',
-                                          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w500),
+                                          style: const TextStyle(
+                                            color: AppTheme.textPrimary,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -365,35 +404,58 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                   onTap: () => _showAssigneePicker(context),
                                   borderRadius: BorderRadius.circular(6),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.black.withOpacity(0.01),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: AppTheme.border),
+                                      border: Border.all(
+                                        color: AppTheme.border,
+                                      ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        if (_selectedAssignee != null && !_shouldClearAssignee) ...[
+                                        if (_selectedAssignee != null &&
+                                            !_shouldClearAssignee) ...[
                                           CircleAvatar(
                                             radius: 9,
-                                            backgroundColor: AppTheme.primary.withOpacity(0.2),
+                                            backgroundColor: AppTheme.primary
+                                                .withOpacity(0.2),
                                             child: Text(
-                                              _selectedAssignee!.name[0].toUpperCase(),
-                                              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                              _selectedAssignee!.name[0]
+                                                  .toUpperCase(),
+                                              style: const TextStyle(
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppTheme.primary,
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
                                             _selectedAssignee!.name,
-                                            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w500),
+                                            style: const TextStyle(
+                                              color: AppTheme.textPrimary,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ] else ...[
-                                          const Icon(Icons.person_outline_rounded, size: 12, color: AppTheme.textSecondary),
+                                          const Icon(
+                                            Icons.person_outline_rounded,
+                                            size: 12,
+                                            color: AppTheme.textSecondary,
+                                          ),
                                           const SizedBox(width: 8),
                                           const Text(
                                             'Assign task',
-                                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                                            style: TextStyle(
+                                              color: AppTheme.textSecondary,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ],
                                       ],
@@ -408,7 +470,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                     ],
                   ),
                 ),
-                
+
                 // Sticky Footer Panel (Only shows when hasChanges is true)
                 _buildFooterPanel(task),
               ],
@@ -427,7 +489,11 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         children: [
           Row(
             children: [
-              const Icon(Icons.task_alt_rounded, color: AppTheme.primary, size: 18),
+              const Icon(
+                Icons.task_alt_rounded,
+                color: AppTheme.primary,
+                size: 18,
+              ),
               const SizedBox(width: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -464,7 +530,10 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => _cancelChanges(task),
-                icon: const Icon(Icons.close_rounded, color: AppTheme.textPrimary),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ],
           ),
@@ -546,7 +615,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
             style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
             decoration: InputDecoration(
               hintText: 'Type your comment here...',
-              hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5)),
+              hintStyle: TextStyle(
+                color: AppTheme.textSecondary.withOpacity(0.5),
+              ),
               filled: true,
               fillColor: Colors.black.withOpacity(0.01),
               enabledBorder: OutlineInputBorder(
@@ -555,9 +626,15 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppTheme.primary,
+                  width: 1.5,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
             ),
           ),
         ),
@@ -577,7 +654,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
             onPressed: () async {
               final text = _commentController.text.trim();
               if (text.isNotEmpty) {
-                await ref.read(taskListProvider.notifier).addComment(task.id, text);
+                await ref
+                    .read(taskListProvider.notifier)
+                    .addComment(task.id, text);
                 _commentController.clear();
                 setState(() => _selectedTab = 'Comments');
                 if (mounted) {
@@ -585,7 +664,10 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                 }
               }
             },
-            child: const Text('Post', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Post',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ],
@@ -595,8 +677,10 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   Widget _buildActivityTimeline(Task task) {
     final filteredLogs = task.activities
         .where((log) {
-          if (_selectedTab == 'Comments') return log.type == ActivityType.comment;
-          if (_selectedTab == 'History') return log.type == ActivityType.history;
+          if (_selectedTab == 'Comments')
+            return log.type == ActivityType.comment;
+          if (_selectedTab == 'History')
+            return log.type == ActivityType.history;
           return true;
         })
         .toList()
@@ -622,7 +706,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         final isHistory = log.type == ActivityType.history;
 
         // Custom indicator colors
-        final Color nodeColor = isHistory ? AppTheme.secondary : AppTheme.primary;
+        final Color nodeColor = isHistory
+            ? AppTheme.secondary
+            : AppTheme.primary;
 
         return IntrinsicHeight(
           child: Row(
@@ -638,22 +724,25 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                       color: nodeColor,
                       shape: BoxShape.circle,
                       boxShadow: [
-                        BoxShadow(color: nodeColor.withOpacity(0.4), blurRadius: 6),
+                        BoxShadow(
+                          color: nodeColor.withOpacity(0.4),
+                          blurRadius: 6,
+                        ),
                       ],
                     ),
                   ),
                   Expanded(
                     child: Container(
                       width: 2,
-                      color: index == filteredLogs.length - 1 
-                          ? Colors.transparent 
+                      color: index == filteredLogs.length - 1
+                          ? Colors.transparent
                           : AppTheme.border,
                     ),
                   ),
                 ],
               ),
               const SizedBox(width: 16),
-              
+
               // Timeline details bubble
               Expanded(
                 child: Container(
@@ -674,12 +763,17 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12.5,
-                              color: isHistory ? AppTheme.textSecondary : AppTheme.textPrimary,
+                              color: isHistory
+                                  ? AppTheme.textSecondary
+                                  : AppTheme.textPrimary,
                             ),
                           ),
                           Text(
                             "${log.timestamp.hour}:${log.timestamp.minute.toString().padLeft(2, '0')}",
-                            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -689,7 +783,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                         style: TextStyle(
                           fontSize: 13,
                           color: AppTheme.textPrimary.withOpacity(0.9),
-                          fontStyle: isHistory ? FontStyle.italic : FontStyle.normal,
+                          fontStyle: isHistory
+                              ? FontStyle.italic
+                              : FontStyle.normal,
                         ),
                       ),
                     ],
@@ -719,10 +815,15 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
               side: const BorderSide(color: AppTheme.border),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => _cancelChanges(task),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
           ),
           const SizedBox(width: 16),
           HoverContainer(
@@ -730,14 +831,22 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 18,
+                ),
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               onPressed: _saveChanges,
               child: const Text(
                 'Save Changes',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -759,7 +868,11 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         ),
         title: const Text(
           'Assignee',
-          style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontFamily: 'Outfit'),
+          style: TextStyle(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Outfit',
+          ),
         ),
         content: SizedBox(
           width: 320,
@@ -769,8 +882,14 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
             itemBuilder: (context, index) {
               if (index == team.length) {
                 return ListTile(
-                  leading: const Icon(Icons.person_remove_outlined, color: Colors.redAccent),
-                  title: const Text('Unassigned', style: TextStyle(color: AppTheme.textPrimary)),
+                  leading: const Icon(
+                    Icons.person_remove_outlined,
+                    color: Colors.redAccent,
+                  ),
+                  title: const Text(
+                    'Unassigned',
+                    style: TextStyle(color: AppTheme.textPrimary),
+                  ),
                   onTap: () {
                     setState(() {
                       _selectedAssignee = null;
@@ -788,11 +907,27 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                   backgroundColor: AppTheme.primary.withOpacity(0.2),
                   child: Text(
                     user.name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                title: Text(user.name, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w500)),
-                subtitle: Text(user.email ?? '', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                title: Text(
+                  user.name,
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  user.email ?? '',
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
                 onTap: () {
                   setState(() {
                     _selectedAssignee = user;
@@ -818,7 +953,13 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppTheme.border),
         ),
-        title: const Text('Delete Task?', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Delete Task?',
+          style: TextStyle(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: const Text(
           'This action cannot be undone. Are you sure you want to delete this task?',
           style: TextStyle(color: AppTheme.textSecondary),
@@ -826,7 +967,10 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
