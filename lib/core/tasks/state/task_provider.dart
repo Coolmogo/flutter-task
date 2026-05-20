@@ -87,6 +87,8 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     String? projectId,
     String? stageId,
     String initialStatus = 'To Do',
+    User? assignee,
+    DateTime? dueDate,
   }) async {
     final currentTasks = state.value ?? [];
     state = const AsyncValue.loading();
@@ -99,6 +101,8 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
       projectId: projectId,
       stageId: stageId,
       status: initialStatus,
+      assignee: assignee,
+      dueDate: dueDate,
     );
 
     final updated = [...currentTasks, newTask];

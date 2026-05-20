@@ -8,14 +8,14 @@ import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'package:task_manager_flutter/core/widgets/hover_container.dart';
 
 class TaskDetailDrawer extends ConsumerStatefulWidget {
-  final String projectId;
-  final String stageId;
+  final String? projectId;
+  final String? stageId;
   final String taskId;
 
   const TaskDetailDrawer({
     super.key,
-    required this.projectId,
-    required this.stageId,
+    this.projectId,
+    this.stageId,
     required this.taskId,
   });
 

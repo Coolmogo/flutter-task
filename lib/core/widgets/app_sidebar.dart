@@ -15,7 +15,7 @@ class AppSidebar extends StatelessWidget {
     final String location = GoRouterState.of(context).uri.path;
     final bool isProjectsActive =
         location == '/' || location.startsWith('/project');
-    final bool isMyTaskActive = location == '/my-tasks';
+    final bool isTasksActive = location == '/tasks';
     final bool isTeamActive = location == '/team';
 
     return Container(
@@ -85,9 +85,9 @@ class AppSidebar extends StatelessWidget {
           _sidebarItem(
             context,
             Icons.task_alt_rounded,
-            'My Tasks',
-            isSelected: isMyTaskActive,
-            onTap: () => context.go('/my-tasks'),
+            'Tasks',
+            isSelected: isTasksActive,
+            onTap: () => context.go('/tasks'),
           ),
           _sidebarItem(
             context,
