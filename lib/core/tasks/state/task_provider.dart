@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../model/domain/task_activity_model.dart';
 import '../model/domain/task_model.dart';
 import '../../../core/auth/auth_controller.dart'; // Verify path fits your auth file
 import '../../users/model/user_model.dart'; // Adjust path to User model if needed

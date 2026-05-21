@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/global_project_provider.dart';
 import '../../users/model/user_model.dart';
+import '../model/domain/task_activity_model.dart';
 import '../state/task_provider.dart';
 import '../model/domain/task_model.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
