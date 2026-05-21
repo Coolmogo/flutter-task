@@ -1,18 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/projects/domain/project_model.dart';
 import '../../features/projects/domain/stage_model.dart';
-import '../../../core/users/model/user_model.dart';
+import '../users/model/user_model.dart';
 
-const List<User> sampleUsers = [
-  User(id: 'john', name: 'John Robert', email: 'john@sample.com'),
-  User(id: 'james', name: 'James Albert', email: 'james@sample.com'),
-];
+Future<List<User>> _loadMockUsers() async {
+  final jsonString = await rootBundle.loadString('mock/data/users.json');
+  final List<dynamic> decoded = jsonDecode(jsonString);
+  return decoded
+      .map((item) => User.fromJson(item as Map<String, dynamic>))
+      .toList();
+}
 
-final teamProvider = Provider<List<User>>((ref) => sampleUsers);
+Future<List<Project>> _loadMockProjects() async {
+  final jsonString = await rootBundle.loadString('mock/data/projects.json');
+  final List<dynamic> decoded = jsonDecode(jsonString);
+  return decoded
+      .map((item) => Project.fromJson(item as Map<String, dynamic>))
+      .toList();
+}
+
+final teamProvider = FutureProvider<List<User>>((ref) => _loadMockUsers());
 
 class ProjectListNotifier extends AsyncNotifier<List<Project>> {
   static const _storageKey = 'taskflow_projects_data_v1';
@@ -25,13 +37,15 @@ class ProjectListNotifier extends AsyncNotifier<List<Project>> {
     if (jsonString != null) {
       try {
         final List<dynamic> decoded = jsonDecode(jsonString);
-        return decoded.map((item) => Project.fromJson(item)).toList();
+        return decoded
+            .map((item) => Project.fromJson(item as Map<String, dynamic>))
+            .toList();
       } catch (e) {
         debugPrint("Error decoding stored projects: $e");
-        return _getInitialProjects();
+        return _loadMockProjects();
       }
     } else {
-      return _getInitialProjects();
+      return _loadMockProjects();
     }
   }
 
@@ -43,28 +57,11 @@ class ProjectListNotifier extends AsyncNotifier<List<Project>> {
     await prefs.setString(_storageKey, encoded);
   }
 
-  List<Project> _getInitialProjects() {
-    return [
-      Project(
-        id: 'PRJ-01',
-        projectCode: 'CSP',
-        title: 'Customer Support Portal Redesign',
-        description:
-            'Redesign and modernize the customer support portal to improve user experience, reduce ticket resolution time, and add self-service capabilities such as knowledge base search and live chat integration.',
-        stages: [
-          Stage(
-            id: 'STG-01',
-            title:
-                'Stage 0', // The automated backlog/inbox stage requested by your boss!
-            description: 'Project initialization backlog container.',
-            dueDate: DateTime.now().add(const Duration(days: 7)),
-          ),
-        ],
-      ),
-    ];
-  }
-
-  Future<void> addProject(String title, String description, String projectCode) async {
+  Future<void> addProject(
+    String title,
+    String description,
+    String projectCode,
+  ) async {
     final currentProjects = state.value ?? [];
     state = const AsyncValue.loading();
     await Future.delayed(const Duration(milliseconds: 400));
@@ -124,10 +121,7 @@ class ProjectListNotifier extends AsyncNotifier<List<Project>> {
         return project.copyWith(
           stages: [
             ...project.stages,
-            Stage(
-              id: newStageId,
-              title: stageTitle,
-            ),
+            Stage(id: newStageId, title: stageTitle),
           ],
         );
       }
