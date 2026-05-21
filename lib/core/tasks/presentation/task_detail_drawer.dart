@@ -873,7 +873,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   }
 
   void _showAssigneePicker(BuildContext context) {
-    final team = ref.read(teamProvider);
+    final teamAsync = ref.read(teamProvider);
 
     showDialog(
       context: context,
@@ -893,68 +893,83 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         ),
         content: SizedBox(
           width: 320,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: team.length + 1,
-            itemBuilder: (context, index) {
-              if (index == team.length) {
+          child: teamAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(
+                child: CircularProgressIndicator(color: AppTheme.primary),
+              ),
+            ),
+            error: (error, stack) => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'Error loading assignees: $error',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            ),
+            data: (team) => ListView.builder(
+              shrinkWrap: true,
+              itemCount: team.length + 1,
+              itemBuilder: (context, index) {
+                if (index == team.length) {
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.person_remove_outlined,
+                      color: Colors.redAccent,
+                    ),
+                    title: const Text(
+                      'Unassigned',
+                      style: TextStyle(color: AppTheme.textPrimary),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _selectedAssignee = null;
+                        _shouldClearAssignee = true;
+                        _hasChanges = true;
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                }
+
+                final user = team[index];
                 return ListTile(
-                  leading: const Icon(
-                    Icons.person_remove_outlined,
-                    color: Colors.redAccent,
+                  leading: CircleAvatar(
+                    backgroundColor: AppTheme.primary.withOpacity(0.2),
+                    child: Text(
+                      user.name[0].toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  title: const Text(
-                    'Unassigned',
-                    style: TextStyle(color: AppTheme.textPrimary),
+                  title: Text(
+                    user.name,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    user.email ?? '',
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                   onTap: () {
                     setState(() {
-                      _selectedAssignee = null;
-                      _shouldClearAssignee = true;
+                      _selectedAssignee = user;
+                      _shouldClearAssignee = false;
                       _hasChanges = true;
                     });
                     Navigator.pop(context);
                   },
                 );
-              }
-
-              final user = team[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppTheme.primary.withOpacity(0.2),
-                  child: Text(
-                    user.name[0].toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                title: Text(
-                  user.name,
-                  style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: Text(
-                  user.email ?? '',
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 12,
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedAssignee = user;
-                    _shouldClearAssignee = false;
-                    _hasChanges = true;
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            },
+              },
+            ),
           ),
         ),
       ),
