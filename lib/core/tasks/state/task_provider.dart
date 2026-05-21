@@ -46,7 +46,7 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     return ActivityLog(
       id: 'ACT-${DateTime.now().millisecondsSinceEpoch}',
       text: text,
-      authorName: currentUser?.name ?? 'System',
+      author: currentUser,
       timestamp: DateTime.now(),
       type: type, // Now binds perfectly without any type conflicts!
     );
@@ -66,14 +66,13 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
           ActivityLog(
             id: 'ACT-INIT-1',
             text: 'Started the Task model design setup.',
-            authorName: 'John Robert',
+            author: const User(id: 'USR-INIT-1', name: 'John Robert'),
             timestamp: DateTime.now().subtract(const Duration(hours: 2)),
             type: ActivityType.comment,
           ),
           ActivityLog(
             id: 'ACT-INIT-2',
             text: 'Created task container environment.',
-            authorName: 'System',
             timestamp: DateTime.now().subtract(const Duration(hours: 3)),
             type: ActivityType.history,
           ),
@@ -118,7 +117,9 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
         (p) => p.id == projectId,
         orElse: () => const Project(id: '', title: '', projectCode: 'TASK'),
       );
-      final code = project.projectCode.isNotEmpty ? project.projectCode : 'TASK';
+      final code = project.projectCode.isNotEmpty
+          ? project.projectCode
+          : 'TASK';
 
       int nextNum = 1;
       for (final t in currentTasks) {

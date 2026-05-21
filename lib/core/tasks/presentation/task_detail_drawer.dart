@@ -316,14 +316,16 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                   decoration: BoxDecoration(
                                     color: Colors.black.withOpacity(0.01),
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: AppTheme.border,
-                                    ),
+                                    border: Border.all(color: AppTheme.border),
                                   ),
                                   child: DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
                                       value: _selectedStatus ?? task.status,
-                                      icon: const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.textSecondary),
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 16,
+                                        color: AppTheme.textSecondary,
+                                      ),
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: AppTheme.textPrimary,
@@ -332,13 +334,18 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                       dropdownColor: AppTheme.cardColor,
                                       isDense: true,
                                       items: ['To Do', 'In Progress', 'Done']
-                                          .map((status) => DropdownMenuItem(
-                                                value: status,
-                                                child: Text(status),
-                                              ))
+                                          .map(
+                                            (status) => DropdownMenuItem(
+                                              value: status,
+                                              child: Text(status),
+                                            ),
+                                          )
                                           .toList(),
                                       onChanged: (val) {
-                                        if (val != null && val != (_selectedStatus ?? task.status)) {
+                                        if (val != null &&
+                                            val !=
+                                                (_selectedStatus ??
+                                                    task.status)) {
                                           setState(() {
                                             _selectedStatus = val;
                                             _hasChanges = true;
@@ -769,7 +776,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            log.authorName,
+                            log.displayAuthorName,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12.5,
