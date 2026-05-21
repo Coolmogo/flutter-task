@@ -1,0 +1,74 @@
+[
+  {
+    "id": "CSP-1",
+    "title": "Define Data Models",
+    "description": "Create Project, Stage, Task, and ActivityLog classes for the task manager workflow.",
+    "dueDate": "2026-05-23T09:00:00.000",
+    "assignee": {
+      "id": "john",
+      "name": "John Robert",
+      "email": "john@sample.com"
+    },
+    "status": "To Do",
+    "projectId": "PRJ-01",
+    "stageId": "STG-01",
+    "activities": [
+      {
+        "id": "ACT-MOCK-1",
+        "text": "Started the Task model design setup.",
+        "author": {
+          "id": "john",
+          "name": "John Robert",
+          "email": "john@sample.com"
+        },
+        "timestamp": "2026-05-21T09:00:00.000",
+        "type": "comment"
+      },
+      {
+        "id": "ACT-MOCK-2",
+        "text": "Created task container environment.",
+        "author": null,
+        "timestamp": "2026-05-21T08:30:00.000",
+        "type": "history"
+      }
+    ]
+  },
+  {
+    "id": "CSP-2",
+    "title": "Wire Task Detail Drawer",
+    "description": "Connect task metadata, comments, and history into the detail drawer.",
+    "dueDate": "2026-05-27T09:00:00.000",
+    "assignee": {
+      "id": "james",
+      "name": "James Albert",
+      "email": "james@sample.com"
+    },
+    "status": "In Progress",
+    "projectId": "PRJ-01",
+    "stageId": "STG-02",
+    "activities": [
+      {
+        "id": "ACT-MOCK-3",
+        "text": "Please make sure comments show the real user, not only a copied display string.",
+        "author": {
+          "id": "maria",
+          "name": "Maria Santos",
+          "email": "maria@sample.com"
+        },
+        "timestamp": "2026-05-21T10:15:00.000",
+        "type": "comment"
+      },
+      {
+        "id": "ACT-MOCK-4",
+        "text": "Assigned task to James Albert",
+        "author": {
+          "id": "john",
+          "name": "John Robert",
+          "email": "john@sample.com"
+        },
+        "timestamp": "2026-05-21T10:00:00.000",
+        "type": "history"
+      }
+    ]
+  }
+]
