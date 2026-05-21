@@ -66,20 +66,12 @@ class Task {
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
-      dueDate: json['dueDate'] != null
-          ? DateTime.parse(json['dueDate'] as String)
-          : null,
-      assignee: json['assignee'] != null
-          ? User.fromJson(json['assignee'] as Map<String, dynamic>)
-          : null,
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate'] as String) : null,
+      assignee: json['assignee'] != null ? User.fromJson(json['assignee'] as Map<String, dynamic>) : null,
       status: json['status'] as String? ?? 'To Do',
       projectId: json['projectId'] as String?,
       stageId: json['stageId'] as String?,
-      activities:
-          (json['activities'] as List<dynamic>?)
-              ?.map((e) => ActivityLog.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      activities: (json['activities'] as List<dynamic>?)?.map((e) => ActivityLog.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
     );
   }
 }
@@ -91,22 +83,10 @@ class Comment {
   final String authorName;
   final DateTime createdAt;
 
-  const Comment({
-    required this.id,
-    required this.taskId,
-    required this.text,
-    required this.authorName,
-    required this.createdAt,
-  });
+  const Comment({required this.id, required this.taskId, required this.text, required this.authorName, required this.createdAt});
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'taskId': taskId,
-      'text': text,
-      'authorName': authorName,
-      'createdAt': createdAt.toIso8601String(),
-    };
+    return {'id': id, 'taskId': taskId, 'text': text, 'authorName': authorName, 'createdAt': createdAt.toIso8601String()};
   }
 
   factory Comment.fromJson(Map<String, dynamic> json) {
@@ -129,22 +109,10 @@ class ActivityLog {
   final DateTime timestamp;
   final ActivityType type;
 
-  const ActivityLog({
-    required this.id,
-    required this.text,
-    required this.authorName,
-    required this.timestamp,
-    required this.type,
-  });
+  const ActivityLog({required this.id, required this.text, required this.authorName, required this.timestamp, required this.type});
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'text': text,
-      'authorName': authorName,
-      'timestamp': timestamp.toIso8601String(),
-      'type': type.name,
-    };
+    return {'id': id, 'text': text, 'authorName': authorName, 'timestamp': timestamp.toIso8601String(), 'type': type.name};
   }
 
   factory ActivityLog.fromJson(Map<String, dynamic> json) {
@@ -156,4 +124,21 @@ class ActivityLog {
       type: ActivityType.values.byName(json['type'] as String? ?? 'comment'),
     );
   }
+}
+
+abstract class ActivityLogClass {
+  final ActivityType type;
+
+  const ActivityLogClass({required this.type});
+}
+
+class UpdateActivityLog extends ActivityLogClass {
+  final String id;
+  final String text;
+  final User user;
+  final DateTime timestamp;
+  final Object? oldValue;
+  final Object? newValue;
+
+  const UpdateActivityLog({required this.id, required this.text, required this.user, required this.timestamp, super.type = ActivityType.history});
 }

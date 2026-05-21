@@ -33,9 +33,7 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
 
   Future<void> _saveToStorage(List<Task> currentList) async {
     final prefs = await SharedPreferences.getInstance();
-    final String encoded = jsonEncode(
-      currentList.map((t) => t.toJson()).toList(),
-    );
+    final String encoded = jsonEncode(currentList.map((t) => t.toJson()).toList());
     await prefs.setString(_storageKey, encoded);
   }
 
@@ -173,46 +171,27 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
 
         // 1. Audit Title Changes
         if (title != null && title != task.title) {
-          internalAuditTrail.add(
-            _createLog('Renamed title to "$title"', ActivityType.history),
-          );
+          internalAuditTrail.add(_createLog('Renamed title to "$title"', ActivityType.history));
         }
 
         // 2. Audit Description Changes
         if (description != null && description != task.description) {
-          internalAuditTrail.add(
-            _createLog('Updated the task description.', ActivityType.history),
-          );
+          internalAuditTrail.add(_createLog('Updated the task description.', ActivityType.history));
         }
 
         // 3. Audit Due Date Changes
         if (clearDueDate && task.dueDate != null) {
-          internalAuditTrail.add(
-            _createLog('Removed the due date.', ActivityType.history),
-          );
+          internalAuditTrail.add(_createLog('Removed the due date.', ActivityType.history));
         } else if (dueDate != null && dueDate != task.dueDate) {
-          final formattedDate =
-              "${dueDate.day}/${dueDate.month}/${dueDate.year}";
-          internalAuditTrail.add(
-            _createLog(
-              'Changed due date to $formattedDate',
-              ActivityType.history,
-            ),
-          );
+          final formattedDate = "${dueDate.day}/${dueDate.month}/${dueDate.year}";
+          internalAuditTrail.add(_createLog('Changed due date to $formattedDate', ActivityType.history));
         }
 
         // 4. Audit Assignee Changes
         if (clearAssignee && task.assignee != null) {
-          internalAuditTrail.add(
-            _createLog('Removed assignee (Unassigned)', ActivityType.history),
-          );
+          internalAuditTrail.add(_createLog('Removed assignee (Unassigned)', ActivityType.history));
         } else if (assignee != null && assignee.id != task.assignee?.id) {
-          internalAuditTrail.add(
-            _createLog(
-              'Assigned task to ${assignee.name}',
-              ActivityType.history,
-            ),
-          );
+          internalAuditTrail.add(_createLog('Assigned task to ${assignee.name}', ActivityType.history));
         }
 
         // Return the fresh mutated task containing the new audit stamps
@@ -271,11 +250,7 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     state = AsyncValue.data(updated);
   }
 
-  Future<void> moveTask({
-    required String taskId,
-    required String? toStageId,
-    required String targetStatus,
-  }) async {
+  Future<void> moveTask({required String taskId, required String? toStageId, required String targetStatus}) async {
     final currentTasks = state.value ?? [];
     state = const AsyncValue.loading();
     await Future.delayed(const Duration(milliseconds: 200));
@@ -311,11 +286,9 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
 }
 
 // Global Providers
-final taskListProvider = AsyncNotifierProvider<TaskListNotifier, List<Task>>(
-  () {
-    return TaskListNotifier();
-  },
-);
+final taskListProvider = AsyncNotifierProvider<TaskListNotifier, List<Task>>(() {
+  return TaskListNotifier();
+});
 
 final myTasksProvider = Provider<AsyncValue<List<Task>>>((ref) {
   final currentUser = ref.watch(authProvider);
@@ -324,8 +297,6 @@ final myTasksProvider = Provider<AsyncValue<List<Task>>>((ref) {
   if (currentUser == null) return const AsyncValue.data([]);
 
   return tasksAsync.whenData((allTasks) {
-    return allTasks
-        .where((task) => task.assignee?.id == currentUser.id)
-        .toList();
+    return allTasks.where((task) => task.assignee?.id == currentUser.id).toList();
   });
 });
