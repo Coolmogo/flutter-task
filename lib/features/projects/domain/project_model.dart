@@ -43,8 +43,11 @@ class Project {
 
   factory Project.fromJson(Map<String, dynamic> json) {
     final titleVal = json['title'] as String? ?? '';
-    final initials = titleVal.split(' ').map((e) => e.isNotEmpty ? e[0].toUpperCase() : '').join();
-    final fallback = initials.isNotEmpty 
+    final initials = titleVal
+        .split(' ')
+        .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
+        .join();
+    final fallback = initials.isNotEmpty
         ? (initials.length > 5 ? initials.substring(0, 4) : initials)
         : 'PRJ';
     return Project(

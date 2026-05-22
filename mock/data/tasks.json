@@ -22,14 +22,18 @@
           "email": "john@sample.com"
         },
         "timestamp": "2026-05-21T09:00:00.000",
-        "type": "comment"
+        "type": "comment",
+        "action": "commented"
       },
       {
         "id": "ACT-MOCK-2",
-        "text": "Created task container environment.",
         "author": null,
         "timestamp": "2026-05-21T08:30:00.000",
-        "type": "history"
+        "type": "history",
+        "action": "updated",
+        "field": "status",
+        "oldValue": null,
+        "newValue": "To Do"
       }
     ]
   },
@@ -56,18 +60,26 @@
           "email": "maria@sample.com"
         },
         "timestamp": "2026-05-21T10:15:00.000",
-        "type": "comment"
+        "type": "comment",
+        "action": "commented"
       },
       {
         "id": "ACT-MOCK-4",
-        "text": "Assigned task to James Albert",
         "author": {
           "id": "john",
           "name": "John Robert",
           "email": "john@sample.com"
         },
         "timestamp": "2026-05-21T10:00:00.000",
-        "type": "history"
+        "type": "history",
+        "action": "assigned",
+        "field": "assignee",
+        "oldValue": null,
+        "newValue": {
+          "id": "james",
+          "name": "James Albert",
+          "email": "james@sample.com"
+        }
       }
     ]
   }

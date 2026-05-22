@@ -2,17 +2,25 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Brand Gradients & Backgrounds
-  static const Color darkBgStart = Color(0xFFF8FAFC); // Clean Slate-50 Light Background
+  static const Color darkBgStart = Color(
+    0xFFF8FAFC,
+  ); // Clean Slate-50 Light Background
   static const Color darkBgEnd = Color(0xFFF1F5F9); // Slate-100
   static const Color cardColor = Color(0xFFFFFFFF); // Pure White
   static const Color sidebarColor = Color(0xFFFFFFFF); // Clean White Sidebar
-  
+
   // Accents
   static const Color primary = Color(0xFF8B5CF6); // Coolmogo Violet
   static const Color secondary = Color(0xFFEC4899); // Coolmogo Coral/Pink
-  static const Color textPrimary = Color(0xFF0F172A); // Zinc 900 (Dark Charcoal Text)
-  static const Color textSecondary = Color(0xFF64748B); // Slate 500 (Muted Text)
-  static const Color border = Color(0xFFE2E8F0); // Slate 200 (Clean Light Borders)
+  static const Color textPrimary = Color(
+    0xFF0F172A,
+  ); // Zinc 900 (Dark Charcoal Text)
+  static const Color textSecondary = Color(
+    0xFF64748B,
+  ); // Slate 500 (Muted Text)
+  static const Color border = Color(
+    0xFFE2E8F0,
+  ); // Slate 200 (Clean Light Borders)
 
   // Status/Priority Colors
   static const Color statusTodo = Color(0xFF3B82F6);
@@ -24,12 +32,12 @@ class AppTheme {
 
   // Background Gradient Decoration
   static BoxDecoration get backgroundGradient => const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [darkBgStart, darkBgEnd],
-        ),
-      );
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [darkBgStart, darkBgEnd],
+    ),
+  );
 
   // Glass Card Decoration
   static BoxDecoration glassCard({
@@ -42,7 +50,8 @@ class AppTheme {
       color: color ?? const Color(0xFFFFFFFF).withOpacity(0.85),
       borderRadius: borderRadius ?? BorderRadius.circular(12),
       border: border ?? Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
-      boxShadow: boxShadow ??
+      boxShadow:
+          boxShadow ??
           [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -55,30 +64,27 @@ class AppTheme {
 
   // Modern Text Styles
   static TextStyle get headingStyle => const TextStyle(
-        fontFamily: 'Outfit',
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: textPrimary,
-        letterSpacing: -0.5,
-      );
+    fontFamily: 'Outfit',
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    color: textPrimary,
+    letterSpacing: -0.5,
+  );
 
   static TextStyle get subHeadingStyle => const TextStyle(
-        fontFamily: 'Outfit',
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: textPrimary,
-      );
+    fontFamily: 'Outfit',
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: textPrimary,
+  );
 
   static TextStyle get bodyStyle => const TextStyle(
-        fontFamily: 'Inter',
-        fontSize: 14,
-        color: textSecondary,
-        height: 1.5,
-      );
+    fontFamily: 'Inter',
+    fontSize: 14,
+    color: textSecondary,
+    height: 1.5,
+  );
 
-  static TextStyle get captionStyle => const TextStyle(
-        fontFamily: 'Inter',
-        fontSize: 12,
-        color: textSecondary,
-      );
+  static TextStyle get captionStyle =>
+      const TextStyle(fontFamily: 'Inter', fontSize: 12, color: textSecondary);
 }

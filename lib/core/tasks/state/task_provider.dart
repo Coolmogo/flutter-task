@@ -1,11 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_manager_flutter/core/auth/auth_controller.dart';
-import 'package:task_manager_flutter/core/tasks/controller/task_controller.dart';
-import 'package:task_manager_flutter/core/tasks/model/domain/task_model.dart';
+import 'package:task_manager_flutter/core/tasks/domain/task_model.dart';
+import 'package:task_manager_flutter/core/tasks/state/task_list_provider.dart';
 
-final taskListProvider = AsyncNotifierProvider<TaskController, List<Task>>(
-  TaskController.new,
-);
+export 'package:task_manager_flutter/core/tasks/state/task_list_provider.dart';
 
 final myTasksProvider = Provider<AsyncValue<List<Task>>>((ref) {
   final currentUser = ref.watch(authProvider);

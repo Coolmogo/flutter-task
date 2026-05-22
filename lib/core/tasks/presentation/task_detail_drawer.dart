@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/global_project_provider.dart';
+import '../../users/state/user_provider.dart';
 import '../../users/model/user_model.dart';
 import '../model/domain/task_activity_model.dart';
 import '../state/task_provider.dart';
@@ -82,15 +82,21 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   }
 
   Future<void> _saveChanges() async {
+    final trimmedDescription = _descController.text.trim();
+    final normalizedDescription = trimmedDescription.isEmpty
+        ? null
+        : trimmedDescription;
+
     await ref
         .read(taskListProvider.notifier)
         .updateTask(
           widget.taskId,
           title: _titleController.text.trim(),
-          description: _descController.text.trim(),
+          description: normalizedDescription,
           dueDate: _selectedDueDate,
           assignee: _selectedAssignee,
           status: _selectedStatus,
+          clearDescription: normalizedDescription == null,
           clearAssignee: _shouldClearAssignee,
         );
 
@@ -796,7 +802,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        log.text,
+                        log.displayText,
                         style: TextStyle(
                           fontSize: 13,
                           color: AppTheme.textPrimary.withOpacity(0.9),

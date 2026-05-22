@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
 import 'package:task_manager_flutter/core/auth/auth_controller.dart';
+import 'package:task_manager_flutter/core/users/state/user_provider.dart';
 import 'package:task_manager_flutter/core/users/model/user_model.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'hover_container.dart';

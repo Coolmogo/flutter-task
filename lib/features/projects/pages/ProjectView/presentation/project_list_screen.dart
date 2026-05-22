@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../core/providers/global_project_provider.dart';
 import '../../../../../core/widgets/app_sidebar.dart';
 import '../../../../../core/widgets/page_header.dart';
 import '../../../../../core/widgets/app_breadcrumbs.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../core/widgets/hover_container.dart';
 import '../../../../../core/tasks/state/task_provider.dart';
+import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
-
 
 class ProjectListScreen extends ConsumerWidget {
   const ProjectListScreen({super.key});
@@ -23,8 +22,11 @@ class ProjectListScreen extends ConsumerWidget {
     // Auto-generate project code shorthand from title in real-time
     titleController.addListener(() {
       final text = titleController.text.trim();
-      final initials = text.split(' ').map((e) => e.isNotEmpty ? e[0].toUpperCase() : '').join();
-      final code = initials.isNotEmpty 
+      final initials = text
+          .split(' ')
+          .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
+          .join();
+      final code = initials.isNotEmpty
           ? (initials.length > 5 ? initials.substring(0, 4) : initials)
           : '';
       codeController.text = code;
@@ -62,13 +64,18 @@ class ProjectListScreen extends ConsumerWidget {
                   labelText: 'Project Title',
                   labelStyle: const TextStyle(color: AppTheme.textSecondary),
                   hintText: 'e.g., Mobile App Build',
-                  hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5)),
+                  hintStyle: TextStyle(
+                    color: AppTheme.textSecondary.withOpacity(0.5),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(color: Color(0xFF334155)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primary,
+                      width: 2,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -84,19 +91,26 @@ class ProjectListScreen extends ConsumerWidget {
                   labelText: 'Project Shorthand Code',
                   labelStyle: const TextStyle(color: AppTheme.textSecondary),
                   hintText: 'e.g., MAB',
-                  hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5)),
+                  hintStyle: TextStyle(
+                    color: AppTheme.textSecondary.withOpacity(0.5),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(color: Color(0xFF334155)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primary,
+                      width: 2,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) return 'Code is required';
-                  if (value.trim().length < 2) return 'Code must be at least 2 characters';
+                  if (value == null || value.trim().isEmpty)
+                    return 'Code is required';
+                  if (value.trim().length < 2)
+                    return 'Code must be at least 2 characters';
                   return null;
                 },
               ),
@@ -108,13 +122,18 @@ class ProjectListScreen extends ConsumerWidget {
                   labelText: 'Description',
                   labelStyle: const TextStyle(color: AppTheme.textSecondary),
                   hintText: 'Add a brief overview...',
-                  hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5)),
+                  hintStyle: TextStyle(
+                    color: AppTheme.textSecondary.withOpacity(0.5),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(color: Color(0xFF334155)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primary,
+                      width: 2,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -201,7 +220,8 @@ class ProjectListScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          onPressed: () => _showCreateProjectDialog(context, ref),
+                          onPressed: () =>
+                              _showCreateProjectDialog(context, ref),
                           icon: const Icon(Icons.add_rounded, size: 20),
                           label: const Text(
                             'Create Project',
@@ -218,8 +238,7 @@ class ProjectListScreen extends ConsumerWidget {
                           color: AppTheme.primary,
                         ),
                       ),
-                      error: (error, stack) =>
-                          Center(
+                      error: (error, stack) => Center(
                         child: Text(
                           'Error loading projects: $error',
                           style: const TextStyle(color: Colors.redAccent),
@@ -234,7 +253,9 @@ class ProjectListScreen extends ConsumerWidget {
                                 Icon(
                                   Icons.assignment_late_outlined,
                                   size: 60,
-                                  color: AppTheme.textSecondary.withOpacity(0.5),
+                                  color: AppTheme.textSecondary.withOpacity(
+                                    0.5,
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 const Text(
@@ -251,12 +272,13 @@ class ProjectListScreen extends ConsumerWidget {
 
                         return GridView.builder(
                           padding: const EdgeInsets.all(40),
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 420,
-                            mainAxisExtent: 250,
-                            crossAxisSpacing: 30,
-                            mainAxisSpacing: 30,
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 420,
+                                mainAxisExtent: 250,
+                                crossAxisSpacing: 30,
+                                mainAxisSpacing: 30,
+                              ),
                           itemCount: projects.length,
                           itemBuilder: (context, index) {
                             final project = projects[index];
@@ -286,29 +308,38 @@ class ProjectListScreen extends ConsumerWidget {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppTheme.primary.withOpacity(0.15),
+                                        color: AppTheme.primary.withOpacity(
+                                          0.15,
+                                        ),
                                         blurRadius: 24,
                                         offset: const Offset(0, 12),
                                       ),
                                     ],
                                   ),
-                                  onTap: () => context.go('/project/${project.id}'),
+                                  onTap: () =>
+                                      context.go('/project/${project.id}'),
                                   child: Padding(
                                     padding: const EdgeInsets.all(24),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 4,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
                                               decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(0.05),
-                                                borderRadius: BorderRadius.circular(6),
+                                                color: Colors.white.withOpacity(
+                                                  0.05,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
                                               ),
                                               child: Text(
                                                 project.id,
@@ -323,7 +354,8 @@ class ProjectListScreen extends ConsumerWidget {
                                             Icon(
                                               Icons.arrow_outward_rounded,
                                               size: 18,
-                                              color: AppTheme.textSecondary.withOpacity(0.5),
+                                              color: AppTheme.textSecondary
+                                                  .withOpacity(0.5),
                                             ),
                                           ],
                                         ),
@@ -342,11 +374,13 @@ class ProjectListScreen extends ConsumerWidget {
                                         const SizedBox(height: 8),
                                         Expanded(
                                           child: Text(
-                                            project.description ?? 'No description provided.',
+                                            project.description ??
+                                                'No description provided.',
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              color: AppTheme.textSecondary.withOpacity(0.8),
+                                              color: AppTheme.textSecondary
+                                                  .withOpacity(0.8),
                                               fontSize: 13,
                                               height: 1.4,
                                             ),
@@ -354,7 +388,8 @@ class ProjectListScreen extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 16),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               '${project.stages.length} ${project.stages.length == 1 ? 'Stage' : 'Stages'}',
@@ -378,11 +413,14 @@ class ProjectListScreen extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 10),
                                         ClipRRect(
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                           child: LinearProgressIndicator(
                                             value: progressRatio,
                                             minHeight: 6,
-                                            backgroundColor: Colors.white.withOpacity(0.05),
+                                            backgroundColor: Colors.white
+                                                .withOpacity(0.05),
                                             color: progressRatio == 1.0
                                                 ? AppTheme.statusDone
                                                 : AppTheme.primary,
@@ -417,12 +455,20 @@ class ProjectListScreen extends ConsumerWidget {
         children: [
           Text(
             project.id,
-            style: const TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: AppTheme.primary,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 10),
           Text(
             project.title,
-            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 6),
           Text(

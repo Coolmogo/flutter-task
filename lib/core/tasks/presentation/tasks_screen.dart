@@ -8,8 +8,9 @@ import 'package:task_manager_flutter/core/tasks/state/task_provider.dart';
 import 'package:task_manager_flutter/core/tasks/model/domain/task_model.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'package:task_manager_flutter/core/widgets/hover_container.dart';
-import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
+import 'package:task_manager_flutter/core/users/state/user_provider.dart';
 import 'package:task_manager_flutter/core/tasks/presentation/task_detail_drawer.dart';
+import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
 import 'package:task_manager_flutter/core/users/model/user_model.dart';
 

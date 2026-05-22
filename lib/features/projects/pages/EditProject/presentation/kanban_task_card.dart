@@ -43,9 +43,7 @@ class KanbanTaskCard extends ConsumerWidget {
       child: HoverContainer(
         scale: 1.03,
         onTap: onTap,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
         child: _buildTaskCardContent(task, projectId, stageId),
       ),
     );
@@ -68,11 +66,13 @@ class KanbanTaskCard extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: AppTheme.glassCard(
-        color: isDragging ? AppTheme.cardColor : AppTheme.cardColor.withOpacity(0.85),
+        color: isDragging
+            ? AppTheme.cardColor
+            : AppTheme.cardColor.withOpacity(0.85),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isDragging 
-              ? AppTheme.primary 
+          color: isDragging
+              ? AppTheme.primary
               : AppTheme.border.withOpacity(0.5),
           width: isDragging ? 2 : 1,
         ),
@@ -81,12 +81,7 @@ class KanbanTaskCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(10),
         child: Container(
           decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(
-                color: accentColor,
-                width: 4,
-              ),
-            ),
+            border: Border(left: BorderSide(color: accentColor, width: 4)),
           ),
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -162,7 +157,10 @@ class KanbanTaskCard extends ConsumerWidget {
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.primary.withOpacity(0.5), width: 1.5),
+                            border: Border.all(
+                              color: AppTheme.primary.withOpacity(0.5),
+                              width: 1.5,
+                            ),
                           ),
                           child: CircleAvatar(
                             radius: 10,

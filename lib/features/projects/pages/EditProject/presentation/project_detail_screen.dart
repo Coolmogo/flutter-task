@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
 import 'package:task_manager_flutter/core/tasks/state/task_provider.dart';
+import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
 import 'package:task_manager_flutter/features/projects/domain/stage_model.dart';
 import 'package:task_manager_flutter/features/projects/pages/EditProject/presentation/add_stage_dialog.dart';
@@ -126,12 +126,13 @@ class ProjectDetailScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.description_outlined, color: AppTheme.primary, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Description',
-                style: AppTheme.subHeadingStyle,
+              const Icon(
+                Icons.description_outlined,
+                color: AppTheme.primary,
+                size: 20,
               ),
+              const SizedBox(width: 8),
+              Text('Description', style: AppTheme.subHeadingStyle),
             ],
           ),
           const SizedBox(height: 14),
@@ -158,12 +159,13 @@ class ProjectDetailScreen extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.layers_outlined, color: AppTheme.primary, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              'Project Stages',
-              style: AppTheme.subHeadingStyle,
+            const Icon(
+              Icons.layers_outlined,
+              color: AppTheme.primary,
+              size: 20,
             ),
+            const SizedBox(width: 8),
+            Text('Project Stages', style: AppTheme.subHeadingStyle),
           ],
         ),
         const SizedBox(height: 20),
@@ -226,7 +228,9 @@ class ProjectDetailScreen extends ConsumerWidget {
                 .toList();
 
             final totalCount = stageTasks.length;
-            final doneCount = stageTasks.where((t) => t.status == 'Done').length;
+            final doneCount = stageTasks
+                .where((t) => t.status == 'Done')
+                .length;
             final double progressRatio = totalCount > 0
                 ? (doneCount / totalCount)
                 : 0.0;
@@ -248,7 +252,10 @@ class ProjectDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 6),
                 Text(
                   '$totalCount Tasks ($doneCount Completed)',
-                  style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
                 const Spacer(),
                 Row(
@@ -256,14 +263,19 @@ class ProjectDetailScreen extends ConsumerWidget {
                   children: [
                     const Text(
                       'Stage Progress',
-                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                     Text(
                       '${(progressRatio * 100).toInt()}%',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: progressRatio == 1.0 ? AppTheme.statusDone : AppTheme.primary,
+                        color: progressRatio == 1.0
+                            ? AppTheme.statusDone
+                            : AppTheme.primary,
                       ),
                     ),
                   ],
@@ -274,7 +286,9 @@ class ProjectDetailScreen extends ConsumerWidget {
                   child: LinearProgressIndicator(
                     value: progressRatio,
                     backgroundColor: Colors.white.withOpacity(0.05),
-                    color: progressRatio == 1.0 ? AppTheme.statusDone : AppTheme.primary,
+                    color: progressRatio == 1.0
+                        ? AppTheme.statusDone
+                        : AppTheme.primary,
                     minHeight: 6,
                   ),
                 ),
@@ -286,7 +300,9 @@ class ProjectDetailScreen extends ConsumerWidget {
                       foregroundColor: AppTheme.primary,
                       padding: EdgeInsets.zero,
                     ),
-                    onPressed: () => context.go('/project/$currentProjectId/board'),
+                    onPressed: () => context.go(
+                      '/project/$currentProjectId/board?stageId=${stage.id}',
+                    ),
                     icon: const Icon(Icons.arrow_forward_rounded, size: 16),
                     label: const Text(
                       'Open Board',
@@ -312,11 +328,17 @@ class ProjectDetailScreen extends ConsumerWidget {
       onTap: () => showAddStageDialog(context, ref, currentProjectId),
       decoration: AppTheme.glassCard(
         color: Colors.white.withOpacity(0.01),
-        border: Border.all(color: const Color(0xFF334155).withOpacity(0.3), width: 1.5),
+        border: Border.all(
+          color: const Color(0xFF334155).withOpacity(0.3),
+          width: 1.5,
+        ),
       ),
       hoverDecoration: AppTheme.glassCard(
         color: Colors.white.withOpacity(0.03),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.4), width: 1.5),
+        border: Border.all(
+          color: AppTheme.primary.withOpacity(0.4),
+          width: 1.5,
+        ),
       ),
       child: SizedBox(
         width: 280,
@@ -348,10 +370,7 @@ class ProjectDetailScreen extends ConsumerWidget {
             const SizedBox(height: 4),
             const Text(
               'Create a new workflow step',
-              style: TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 11,
-              ),
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
             ),
           ],
         ),
