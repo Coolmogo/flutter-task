@@ -12,8 +12,6 @@ final myTasksProvider = Provider<AsyncValue<List<Task>>>((ref) {
   if (currentUser == null) return const AsyncValue.data([]);
 
   return tasksAsync.whenData((allTasks) {
-    return allTasks
-        .where((task) => task.assignee?.id == currentUser.id)
-        .toList();
+    return allTasks.where((task) => task.assignee?.id == currentUser.id).toList();
   });
 });

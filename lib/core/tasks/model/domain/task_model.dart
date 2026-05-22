@@ -67,20 +67,12 @@ class Task {
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
-      dueDate: json['dueDate'] != null
-          ? DateTime.parse(json['dueDate'] as String)
-          : null,
-      assignee: json['assignee'] != null
-          ? User.fromJson(json['assignee'] as Map<String, dynamic>)
-          : null,
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate'] as String) : null,
+      assignee: json['assignee'] != null ? User.fromJson(json['assignee'] as Map<String, dynamic>) : null,
       status: json['status'] as String? ?? 'To Do',
       projectId: json['projectId'] as String?,
       stageId: json['stageId'] as String?,
-      activities:
-          (json['activities'] as List<dynamic>?)
-              ?.map((e) => ActivityLog.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      activities: (json['activities'] as List<dynamic>?)?.map((e) => ActivityLog.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
     );
   }
 }
