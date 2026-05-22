@@ -30,7 +30,9 @@ class _HoverContainerState extends State<HoverContainer> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: widget.onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedScale(
@@ -40,8 +42,8 @@ class _HoverContainerState extends State<HoverContainer> {
           child: AnimatedContainer(
             duration: widget.duration,
             curve: Curves.easeOutCubic,
-            decoration: _isHovered 
-                ? (widget.hoverDecoration ?? widget.decoration) 
+            decoration: _isHovered
+                ? (widget.hoverDecoration ?? widget.decoration)
                 : widget.decoration,
             child: widget.child,
           ),

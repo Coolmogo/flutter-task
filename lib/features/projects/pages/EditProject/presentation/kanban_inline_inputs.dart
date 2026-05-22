@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
 import 'package:task_manager_flutter/core/tasks/state/task_provider.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'package:task_manager_flutter/core/widgets/hover_container.dart';
+import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 
 class InlineQuickAddTaskInput extends StatefulWidget {
   final String projectId;

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "PRJ-01",
+    "title": "Customer Support Portal Redesign",
+    "description": "Redesign and modernize the customer support portal to improve user experience, reduce ticket resolution time, and add self-service capabilities such as knowledge base search and live chat integration.",
+    "projectCode": "CSP",
+    "stages": [
+      {
+        "id": "STG-01",
+        "title": "Stage 0",
+        "description": "Project initialization backlog container.",
+        "dueDate": "2026-05-28T09:00:00.000",
+        "statuses": ["To Do", "In Progress", "Done"]
+      },
+      {
+        "id": "STG-02",
+        "title": "Design Review",
+        "description": "Review customer-facing flows before implementation.",
+        "dueDate": "2026-06-04T09:00:00.000",
+        "statuses": ["To Do", "In Progress", "Blocked", "Done"]
+      }
+    ]
+  }
+]

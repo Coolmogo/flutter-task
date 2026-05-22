@@ -8,8 +8,9 @@ import 'package:task_manager_flutter/core/tasks/state/task_provider.dart';
 import 'package:task_manager_flutter/core/tasks/model/domain/task_model.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'package:task_manager_flutter/core/widgets/hover_container.dart';
-import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
+import 'package:task_manager_flutter/core/users/state/user_provider.dart';
 import 'package:task_manager_flutter/core/tasks/presentation/task_detail_drawer.dart';
+import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
 import 'package:task_manager_flutter/core/users/model/user_model.dart';
 
@@ -22,13 +23,14 @@ class TasksScreen extends ConsumerStatefulWidget {
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   // State for active drawer
   Task? _selectedTaskForDrawer;
-  
+
   // Filters State
   String _searchText = '';
-  String _selectedTab = 'All'; // 'All' | 'My Tasks' | 'Independent' | 'Project Tasks'
+  String _selectedTab =
+      'All'; // 'All' | 'My Tasks' | 'Independent' | 'Project Tasks'
   String _selectedStatus = 'All'; // 'All' | 'To Do' | 'In Progress' | 'Done'
 
   @override
@@ -68,7 +70,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         scale: 1.03,
                         child: ElevatedButton.icon(
                           onPressed: () => _showCreateTaskDialog(context),
-                          icon: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
+                          icon: const Icon(
+                            Icons.add_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
                           label: const Text(
                             'Create Task',
                             style: TextStyle(
@@ -79,7 +85,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -89,15 +98,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       ),
                     ],
                   ),
-                  
+
                   // Filter and Search Panel
                   _buildFilterPanel(context),
-                  
+
                   // Main Tasks List
                   Expanded(
                     child: tasksAsync.when(
                       loading: () => const Center(
-                        child: CircularProgressIndicator(color: AppTheme.primary),
+                        child: CircularProgressIndicator(
+                          color: AppTheme.primary,
+                        ),
                       ),
                       error: (error, stack) => Center(
                         child: Text(
@@ -108,7 +119,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       data: (allTasks) {
                         return projectsAsync.when(
                           loading: () => const Center(
-                            child: CircularProgressIndicator(color: AppTheme.primary),
+                            child: CircularProgressIndicator(
+                              color: AppTheme.primary,
+                            ),
                           ),
                           error: (err, stack) => Center(
                             child: Text(
@@ -120,28 +133,37 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             // Filter tasks
                             final filteredTasks = allTasks.where((task) {
                               // 1. Search Text Match
-                              final matchesSearch = task.title.toLowerCase().contains(_searchText.toLowerCase()) ||
-                                  (task.description ?? '').toLowerCase().contains(_searchText.toLowerCase());
+                              final matchesSearch =
+                                  task.title.toLowerCase().contains(
+                                    _searchText.toLowerCase(),
+                                  ) ||
+                                  (task.description ?? '')
+                                      .toLowerCase()
+                                      .contains(_searchText.toLowerCase());
                               if (!matchesSearch) return false;
 
                               // 2. Tab Filter Match
                               if (_selectedTab == 'My Tasks') {
-                                if (currentUser == null || task.assignee?.id != currentUser.id) {
+                                if (currentUser == null ||
+                                    task.assignee?.id != currentUser.id) {
                                   return false;
                                 }
                               } else if (_selectedTab == 'Independent') {
-                                if (task.projectId != null && task.projectId!.isNotEmpty) {
+                                if (task.projectId != null &&
+                                    task.projectId!.isNotEmpty) {
                                   return false;
                                 }
                               } else if (_selectedTab == 'Project Tasks') {
-                                if (task.projectId == null || task.projectId!.isEmpty) {
+                                if (task.projectId == null ||
+                                    task.projectId!.isEmpty) {
                                   return false;
                                 }
                               }
 
                               // 3. Status Filter Match
                               if (_selectedStatus != 'All') {
-                                if (task.status.toLowerCase() != _selectedStatus.toLowerCase()) {
+                                if (task.status.toLowerCase() !=
+                                    _selectedStatus.toLowerCase()) {
                                   return false;
                                 }
                               }
@@ -154,15 +176,23 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             }
 
                             return ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 40,
+                                vertical: 24,
+                              ),
                               itemCount: filteredTasks.length,
                               itemBuilder: (context, index) {
                                 final task = filteredTasks[index];
                                 final associatedProject = projects.firstWhere(
                                   (p) => p.id == task.projectId,
-                                  orElse: () => const Project(id: '', title: ''),
+                                  orElse: () =>
+                                      const Project(id: '', title: ''),
                                 );
-                                return _buildTaskCard(context, task, associatedProject);
+                                return _buildTaskCard(
+                                  context,
+                                  task,
+                                  associatedProject,
+                                );
                               },
                             );
                           },
@@ -204,11 +234,21 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   ),
                   child: TextField(
                     onChanged: (val) => setState(() => _searchText = val),
-                    style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textPrimary,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Search tasks by title or details...',
-                      hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.6), fontSize: 13),
-                      prefixIcon: const Icon(Icons.search_rounded, size: 18, color: AppTheme.textSecondary),
+                      hintStyle: TextStyle(
+                        color: AppTheme.textSecondary.withOpacity(0.6),
+                        fontSize: 13,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        size: 18,
+                        color: AppTheme.textSecondary,
+                      ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     ),
@@ -230,15 +270,27 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _selectedStatus,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
-                      icon: const Icon(Icons.filter_list_rounded, size: 16, color: AppTheme.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      icon: const Icon(
+                        Icons.filter_list_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       onChanged: (val) {
                         if (val != null) setState(() => _selectedStatus = val);
                       },
-                      items: ['All', 'To Do', 'In Progress', 'Done'].map((status) {
+                      items: ['All', 'To Do', 'In Progress', 'Done'].map((
+                        status,
+                      ) {
                         return DropdownMenuItem(
                           value: status,
-                          child: Text(status == 'All' ? 'All Statuses' : status),
+                          child: Text(
+                            status == 'All' ? 'All Statuses' : status,
+                          ),
                         );
                       }).toList(),
                     ),
@@ -334,7 +386,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  Widget _buildTaskCard(BuildContext context, Task task, Project associatedProject) {
+  Widget _buildTaskCard(
+    BuildContext context,
+    Task task,
+    Project associatedProject,
+  ) {
     // Determine status color
     Color statusColor = AppTheme.statusTodo;
     if (task.status.toLowerCase() == 'in progress') {
@@ -380,7 +436,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
               ),
               const SizedBox(width: 20),
-              
+
               // Task details column
               Expanded(
                 child: Column(
@@ -400,16 +456,25 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         // Project/Independent Badge
                         if (isIndependent)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.secondary.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppTheme.secondary.withOpacity(0.2)),
+                              border: Border.all(
+                                color: AppTheme.secondary.withOpacity(0.2),
+                              ),
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.bolt_rounded, size: 10, color: AppTheme.secondary),
+                                Icon(
+                                  Icons.bolt_rounded,
+                                  size: 10,
+                                  color: AppTheme.secondary,
+                                ),
                                 SizedBox(width: 4),
                                 Text(
                                   'Independent Task',
@@ -424,20 +489,29 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           )
                         else
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.primary.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                              border: Border.all(
+                                color: AppTheme.primary.withOpacity(0.2),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.folder_open_rounded, size: 10, color: AppTheme.primary),
+                                const Icon(
+                                  Icons.folder_open_rounded,
+                                  size: 10,
+                                  color: AppTheme.primary,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  associatedProject.title.isNotEmpty 
-                                      ? associatedProject.title 
+                                  associatedProject.title.isNotEmpty
+                                      ? associatedProject.title
                                       : 'Project Task',
                                   style: const TextStyle(
                                     fontSize: 10,
@@ -467,14 +541,21 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               // Due Date indicator
               if (task.dueDate != null) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.02),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today_rounded, size: 12, color: AppTheme.textSecondary),
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 12,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         "${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}",
@@ -513,23 +594,30 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   child: CircleAvatar(
                     radius: 12,
                     backgroundColor: Colors.transparent,
-                    child: Icon(Icons.person_outline_rounded, size: 16, color: AppTheme.textSecondary),
+                    child: Icon(
+                      Icons.person_outline_rounded,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ),
               const SizedBox(width: 20),
 
               // Status indicator clickable toggle
               InkWell(
-                onTap: () => ref.read(taskListProvider.notifier).toggleTaskStatus(task.id),
+                onTap: () => ref
+                    .read(taskListProvider.notifier)
+                    .toggleTaskStatus(task.id),
                 borderRadius: BorderRadius.circular(6),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: statusColor.withOpacity(0.3),
-                    ),
+                    border: Border.all(color: statusColor.withOpacity(0.3)),
                   ),
                   child: Text(
                     task.status.toUpperCase(),
@@ -569,7 +657,7 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  
+
   Project? _selectedProject;
   String? _selectedStageId;
   User? _selectedAssignee;
@@ -586,7 +674,11 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
   @override
   Widget build(BuildContext context) {
     final projectsAsync = ref.watch(projectListProvider);
-    final team = ref.watch(teamProvider);
+    final teamAsync = ref.watch(teamProvider);
+    final team = teamAsync.maybeWhen(
+      data: (users) => users,
+      orElse: () => const <User>[],
+    );
 
     return AlertDialog(
       backgroundColor: AppTheme.cardColor,
@@ -614,30 +706,57 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                 // Title Field
                 TextFormField(
                   controller: _titleController,
-                  style: const TextStyle(fontSize: 14, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textPrimary,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'Task Title',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.border)),
-                    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.primary, width: 1.5)),
+                    labelStyle: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.border),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppTheme.primary,
+                        width: 1.5,
+                      ),
+                    ),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Title is required';
+                    if (val == null || val.trim().isEmpty)
+                      return 'Title is required';
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Description Field
                 TextFormField(
                   controller: _descController,
                   maxLines: 3,
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textPrimary,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'Description',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: AppTheme.border)),
-                    focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: AppTheme.primary, width: 1.5)),
+                    labelStyle: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.border),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppTheme.primary,
+                        width: 1.5,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -651,15 +770,29 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                       value: _selectedProject,
                       decoration: InputDecoration(
                         labelText: 'Associate Project (Optional)',
-                        labelStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.border)),
+                        labelStyle: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppTheme.border),
+                        ),
                       ),
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textPrimary,
+                      ),
                       dropdownColor: AppTheme.cardColor,
                       items: [
                         DropdownMenuItem<Project?>(
                           value: null,
-                          child: Text('None (Independent Task)', style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            'None (Independent Task)',
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                         ...projects.map((p) {
                           return DropdownMenuItem<Project?>(
@@ -671,8 +804,9 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                       onChanged: (proj) {
                         setState(() {
                           _selectedProject = proj;
-                          _selectedStageId = (proj != null && proj.stages.isNotEmpty) 
-                              ? proj.stages.first.id 
+                          _selectedStageId =
+                              (proj != null && proj.stages.isNotEmpty)
+                              ? proj.stages.first.id
                               : null;
                         });
                       },
@@ -687,10 +821,18 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                     value: _selectedStageId,
                     decoration: InputDecoration(
                       labelText: 'Select Stage Sprint',
-                      labelStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.border)),
+                      labelStyle: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppTheme.border),
+                      ),
                     ),
-                    style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textPrimary,
+                    ),
                     dropdownColor: AppTheme.cardColor,
                     items: _selectedProject!.stages.map((stage) {
                       return DropdownMenuItem(
@@ -709,16 +851,29 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                 DropdownButtonFormField<User?>(
                   value: _selectedAssignee,
                   decoration: InputDecoration(
-                    labelText: 'Assignee',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.border)),
+                    labelText: teamAsync.isLoading
+                        ? 'Loading assignees...'
+                        : 'Assignee',
+                    labelStyle: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.border),
+                    ),
                   ),
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textPrimary,
+                  ),
                   dropdownColor: AppTheme.cardColor,
                   items: [
                     DropdownMenuItem<User?>(
                       value: null,
-                      child: Text('Unassigned', style: TextStyle(color: AppTheme.textSecondary)),
+                      child: Text(
+                        'Unassigned',
+                        style: TextStyle(color: AppTheme.textSecondary),
+                      ),
                     ),
                     ...team.map((u) {
                       return DropdownMenuItem<User?>(
@@ -740,7 +895,9 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                       context: context,
                       initialDate: DateTime.now(),
                       firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                      lastDate: DateTime.now().add(
+                        const Duration(days: 365 * 2),
+                      ),
                     );
                     if (picked != null) {
                       setState(() => _selectedDueDate = picked);
@@ -749,7 +906,9 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: AppTheme.border)),
+                      border: Border(
+                        bottom: BorderSide(color: AppTheme.border),
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -760,11 +919,19 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                               : "Due: ${_selectedDueDate!.day}/${_selectedDueDate!.month}/${_selectedDueDate!.year}",
                           style: TextStyle(
                             fontSize: 13,
-                            color: _selectedDueDate == null ? AppTheme.textSecondary : AppTheme.textPrimary,
-                            fontWeight: _selectedDueDate == null ? FontWeight.normal : FontWeight.bold,
+                            color: _selectedDueDate == null
+                                ? AppTheme.textSecondary
+                                : AppTheme.textPrimary,
+                            fontWeight: _selectedDueDate == null
+                                ? FontWeight.normal
+                                : FontWeight.bold,
                           ),
                         ),
-                        const Icon(Icons.calendar_today_rounded, size: 16, color: AppTheme.textSecondary),
+                        const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 16,
+                          color: AppTheme.textSecondary,
+                        ),
                       ],
                     ),
                   ),
@@ -776,16 +943,21 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                   value: _selectedStatus,
                   decoration: InputDecoration(
                     labelText: 'Initial Status',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.border)),
+                    labelStyle: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.border),
+                    ),
                   ),
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textPrimary,
+                  ),
                   dropdownColor: AppTheme.cardColor,
                   items: ['To Do', 'In Progress', 'Done'].map((status) {
-                    return DropdownMenuItem(
-                      value: status,
-                      child: Text(status),
-                    );
+                    return DropdownMenuItem(value: status, child: Text(status));
                   }).toList(),
                   onChanged: (val) {
                     if (val != null) {
@@ -801,7 +973,10 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: AppTheme.textSecondary),
+          ),
         ),
         HoverContainer(
           scale: 1.05,
@@ -810,23 +985,32 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
               backgroundColor: AppTheme.primary,
               foregroundColor: Colors.white,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () async {
               if (_formKey.currentState?.validate() ?? false) {
                 Navigator.pop(context);
-                await ref.read(taskListProvider.notifier).addTask(
-                  title: _titleController.text.trim(),
-                  description: _descController.text.trim().isEmpty ? null : _descController.text.trim(),
-                  projectId: _selectedProject?.id,
-                  stageId: _selectedStageId,
-                  initialStatus: _selectedStatus,
-                  assignee: _selectedAssignee,
-                  dueDate: _selectedDueDate,
-                );
+                await ref
+                    .read(taskListProvider.notifier)
+                    .addTask(
+                      title: _titleController.text.trim(),
+                      description: _descController.text.trim().isEmpty
+                          ? null
+                          : _descController.text.trim(),
+                      projectId: _selectedProject?.id,
+                      stageId: _selectedStageId,
+                      initialStatus: _selectedStatus,
+                      assignee: _selectedAssignee,
+                      dueDate: _selectedDueDate,
+                    );
               }
             },
-            child: const Text('Create', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Create',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ],

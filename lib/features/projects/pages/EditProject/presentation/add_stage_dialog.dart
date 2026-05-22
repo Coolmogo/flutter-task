@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
+import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 
 void showAddStageDialog(BuildContext context, WidgetRef ref, String projectId) {
   final controller = TextEditingController();

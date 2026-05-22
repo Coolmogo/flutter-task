@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../core/providers/global_project_provider.dart';
 import '../../../../../core/widgets/app_sidebar.dart';
 import '../../../../../core/widgets/page_header.dart';
 import '../../../../../core/widgets/app_breadcrumbs.dart';
 import '../../../../../core/tasks/model/domain/task_model.dart';
 import 'package:task_manager_flutter/core/tasks/presentation/task_detail_drawer.dart';
 import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
+import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 import 'package:task_manager_flutter/features/projects/pages/EditProject/presentation/kanban_column.dart';
 import 'kanban_inline_inputs.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 
 class ProjectBoardScreen extends ConsumerStatefulWidget {
   final String projectId;
-  const ProjectBoardScreen({super.key, required this.projectId});
+  final String? initialStageId;
+
+  const ProjectBoardScreen({
+    super.key,
+    required this.projectId,
+    this.initialStageId,
+  });
 
   @override
   ConsumerState<ProjectBoardScreen> createState() => _ProjectBoardScreenState();
@@ -58,8 +64,12 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                 loading: () => const Center(
                   child: CircularProgressIndicator(color: AppTheme.primary),
                 ),
-                error: (error, stack) =>
-                    Center(child: Text('Error synchronizing board: $error', style: const TextStyle(color: Colors.redAccent))),
+                error: (error, stack) => Center(
+                  child: Text(
+                    'Error synchronizing board: $error',
+                    style: const TextStyle(color: Colors.redAccent),
+                  ),
+                ),
                 data: (projects) {
                   final project = projects.firstWhere(
                     (p) => p.id == widget.projectId,
@@ -75,16 +85,19 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                     );
                   }
 
-                  if ((_activeStageId == null || _activeStageId!.isEmpty) &&
-                      project.stages.isNotEmpty) {
-                    _activeStageId = project.stages.first.id;
+                  if (project.stages.isNotEmpty) {
+                    final stageIds = project.stages.map((s) => s.id).toSet();
+                    if (_activeStageId == null ||
+                        !stageIds.contains(_activeStageId)) {
+                      _activeStageId = stageIds.contains(widget.initialStageId)
+                          ? widget.initialStageId
+                          : project.stages.first.id;
+                    }
                   }
 
                   final activeStage = project.stages.firstWhere(
                     (s) => s.id == _activeStageId,
-                    orElse: () => project.stages.isNotEmpty
-                        ? project.stages.first
-                        : project.stages.first,
+                    orElse: () => project.stages.first,
                   );
 
                   return Column(
@@ -104,7 +117,11 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                           const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.layers_rounded, color: AppTheme.textSecondary, size: 16),
+                              Icon(
+                                Icons.layers_rounded,
+                                color: AppTheme.textSecondary,
+                                size: 16,
+                              ),
                               SizedBox(width: 6),
                               Text(
                                 'Stage Sprint: ',
@@ -117,7 +134,7 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                             ],
                           ),
                           const SizedBox(width: 8),
-                           Container(
+                          Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.02),
@@ -136,13 +153,18 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                                   color: AppTheme.primary,
                                   fontSize: 14,
                                 ),
-                                icon: const Icon(Icons.arrow_drop_down_rounded, color: AppTheme.primary),
+                                icon: const Icon(
+                                  Icons.arrow_drop_down_rounded,
+                                  color: AppTheme.primary,
+                                ),
                                 items: project.stages.map((stage) {
                                   return DropdownMenuItem<String>(
                                     value: stage.id,
                                     child: Text(
                                       stage.title,
-                                      style: const TextStyle(color: AppTheme.textPrimary),
+                                      style: const TextStyle(
+                                        color: AppTheme.textPrimary,
+                                      ),
                                     ),
                                   );
                                 }).toList(),
@@ -181,7 +203,8 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                                           (selectedTask, associatedStageId) {
                                             setState(() {
                                               _selectedTask = selectedTask;
-                                              _selectedStageId = associatedStageId;
+                                              _selectedStageId =
+                                                  associatedStageId;
                                             });
                                             WidgetsBinding.instance
                                                 .addPostFrameCallback((_) {

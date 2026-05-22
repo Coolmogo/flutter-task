@@ -21,10 +21,7 @@ class PageHeader extends StatelessWidget {
       decoration: const BoxDecoration(
         color: Colors.transparent,
         border: Border(
-          bottom: BorderSide(
-            color: Color(0xFF1E293B),
-            width: 1.0,
-          ),
+          bottom: BorderSide(color: Color(0xFF1E293B), width: 1.0),
         ),
       ),
       width: double.infinity,
@@ -48,10 +45,7 @@ class PageHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              if (actions != null) ...[
-                const SizedBox(width: 16),
-                ...actions!,
-              ],
+              if (actions != null) ...[const SizedBox(width: 16), ...actions!],
             ],
           ),
         ],

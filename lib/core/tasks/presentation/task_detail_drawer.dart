@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/global_project_provider.dart';
+import '../../users/state/user_provider.dart';
 import '../../users/model/user_model.dart';
+import '../model/domain/task_activity_model.dart';
 import '../state/task_provider.dart';
 import '../model/domain/task_model.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
@@ -81,15 +82,21 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   }
 
   Future<void> _saveChanges() async {
+    final trimmedDescription = _descController.text.trim();
+    final normalizedDescription = trimmedDescription.isEmpty
+        ? null
+        : trimmedDescription;
+
     await ref
         .read(taskListProvider.notifier)
         .updateTask(
           widget.taskId,
           title: _titleController.text.trim(),
-          description: _descController.text.trim(),
+          description: normalizedDescription,
           dueDate: _selectedDueDate,
           assignee: _selectedAssignee,
           status: _selectedStatus,
+          clearDescription: normalizedDescription == null,
           clearAssignee: _shouldClearAssignee,
         );
 
@@ -315,14 +322,16 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                   decoration: BoxDecoration(
                                     color: Colors.black.withOpacity(0.01),
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: AppTheme.border,
-                                    ),
+                                    border: Border.all(color: AppTheme.border),
                                   ),
                                   child: DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
                                       value: _selectedStatus ?? task.status,
-                                      icon: const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.textSecondary),
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 16,
+                                        color: AppTheme.textSecondary,
+                                      ),
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: AppTheme.textPrimary,
@@ -331,13 +340,18 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                       dropdownColor: AppTheme.cardColor,
                                       isDense: true,
                                       items: ['To Do', 'In Progress', 'Done']
-                                          .map((status) => DropdownMenuItem(
-                                                value: status,
-                                                child: Text(status),
-                                              ))
+                                          .map(
+                                            (status) => DropdownMenuItem(
+                                              value: status,
+                                              child: Text(status),
+                                            ),
+                                          )
                                           .toList(),
                                       onChanged: (val) {
-                                        if (val != null && val != (_selectedStatus ?? task.status)) {
+                                        if (val != null &&
+                                            val !=
+                                                (_selectedStatus ??
+                                                    task.status)) {
                                           setState(() {
                                             _selectedStatus = val;
                                             _hasChanges = true;
@@ -768,7 +782,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            log.authorName,
+                            log.displayAuthorName,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12.5,
@@ -788,7 +802,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        log.text,
+                        log.displayText,
                         style: TextStyle(
                           fontSize: 13,
                           color: AppTheme.textPrimary.withOpacity(0.9),
@@ -865,7 +879,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   }
 
   void _showAssigneePicker(BuildContext context) {
-    final team = ref.read(teamProvider);
+    final teamAsync = ref.read(teamProvider);
 
     showDialog(
       context: context,
@@ -885,68 +899,83 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         ),
         content: SizedBox(
           width: 320,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: team.length + 1,
-            itemBuilder: (context, index) {
-              if (index == team.length) {
+          child: teamAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(
+                child: CircularProgressIndicator(color: AppTheme.primary),
+              ),
+            ),
+            error: (error, stack) => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'Error loading assignees: $error',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            ),
+            data: (team) => ListView.builder(
+              shrinkWrap: true,
+              itemCount: team.length + 1,
+              itemBuilder: (context, index) {
+                if (index == team.length) {
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.person_remove_outlined,
+                      color: Colors.redAccent,
+                    ),
+                    title: const Text(
+                      'Unassigned',
+                      style: TextStyle(color: AppTheme.textPrimary),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _selectedAssignee = null;
+                        _shouldClearAssignee = true;
+                        _hasChanges = true;
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                }
+
+                final user = team[index];
                 return ListTile(
-                  leading: const Icon(
-                    Icons.person_remove_outlined,
-                    color: Colors.redAccent,
+                  leading: CircleAvatar(
+                    backgroundColor: AppTheme.primary.withOpacity(0.2),
+                    child: Text(
+                      user.name[0].toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  title: const Text(
-                    'Unassigned',
-                    style: TextStyle(color: AppTheme.textPrimary),
+                  title: Text(
+                    user.name,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    user.email ?? '',
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                   onTap: () {
                     setState(() {
-                      _selectedAssignee = null;
-                      _shouldClearAssignee = true;
+                      _selectedAssignee = user;
+                      _shouldClearAssignee = false;
                       _hasChanges = true;
                     });
                     Navigator.pop(context);
                   },
                 );
-              }
-
-              final user = team[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppTheme.primary.withOpacity(0.2),
-                  child: Text(
-                    user.name[0].toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                title: Text(
-                  user.name,
-                  style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: Text(
-                  user.email ?? '',
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 12,
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedAssignee = user;
-                    _shouldClearAssignee = false;
-                    _hasChanges = true;
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            },
+              },
+            ),
           ),
         ),
       ),

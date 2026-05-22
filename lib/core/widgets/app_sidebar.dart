@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:task_manager_flutter/core/providers/global_project_provider.dart';
 import 'package:task_manager_flutter/core/auth/auth_controller.dart';
+import 'package:task_manager_flutter/core/users/state/user_provider.dart';
 import 'package:task_manager_flutter/core/users/model/user_model.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'hover_container.dart';
@@ -22,12 +22,7 @@ class AppSidebar extends StatelessWidget {
       width: 260,
       decoration: const BoxDecoration(
         color: AppTheme.sidebarColor,
-        border: Border(
-          right: BorderSide(
-            color: AppTheme.border,
-            width: 1.5,
-          ),
-        ),
+        border: Border(right: BorderSide(color: AppTheme.border, width: 1.5)),
       ),
       child: Column(
         children: [
@@ -52,7 +47,11 @@ class AppSidebar extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.rocket_launch, color: Colors.white, size: 22),
+                  child: const Icon(
+                    Icons.rocket_launch,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 ShaderMask(
@@ -103,7 +102,7 @@ class AppSidebar extends StatelessWidget {
           Consumer(
             builder: (context, ref, child) {
               final currentUser = ref.watch(authProvider);
-              final team = ref.watch(teamProvider);
+              final teamAsync = ref.watch(teamProvider);
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -128,10 +127,7 @@ class AppSidebar extends StatelessWidget {
                       decoration: AppTheme.glassCard(
                         color: Colors.black.withOpacity(0.02),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: AppTheme.border,
-                          width: 1,
-                        ),
+                        border: Border.all(color: AppTheme.border, width: 1),
                       ),
                       hoverDecoration: AppTheme.glassCard(
                         color: Colors.black.withOpacity(0.04),
@@ -142,62 +138,98 @@ class AppSidebar extends StatelessWidget {
                         ),
                       ),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<User>(
-                            isExpanded: true,
-                            value: currentUser,
-                            hint: const Text(
-                              "Select User",
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 4,
+                        ),
+                        child: teamAsync.when(
+                          loading: () => const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Text(
+                              "Loading users...",
                               style: TextStyle(
                                 color: AppTheme.textSecondary,
                                 fontSize: 13,
                               ),
                             ),
-                            dropdownColor: AppTheme.sidebarColor,
-                            icon: const Icon(
-                              Icons.swap_vert_rounded,
-                              color: AppTheme.textSecondary,
-                              size: 18,
-                            ),
-                            items: team
-                                .map(
-                                  (user) => DropdownMenuItem(
-                                    value: user,
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 10,
-                                          backgroundColor: AppTheme.primary.withOpacity(0.2),
-                                          child: Text(
-                                            user.name[0].toUpperCase(),
-                                            style: const TextStyle(
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppTheme.primary,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          user.name,
-                                          style: const TextStyle(
-                                            color: AppTheme.textPrimary,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (user) {
-                              if (user != null) {
-                                ref.read(authProvider.notifier).login(user);
-                              }
-                            },
                           ),
+                          error: (error, stack) => const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Text(
+                              "Users unavailable",
+                              style: TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          data: (team) {
+                            User? selectedUser;
+                            for (final user in team) {
+                              if (user.id == currentUser?.id) {
+                                selectedUser = user;
+                                break;
+                              }
+                            }
+
+                            return DropdownButtonHideUnderline(
+                              child: DropdownButton<User>(
+                                isExpanded: true,
+                                value: selectedUser,
+                                hint: const Text(
+                                  "Select User",
+                                  style: TextStyle(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                dropdownColor: AppTheme.sidebarColor,
+                                icon: const Icon(
+                                  Icons.swap_vert_rounded,
+                                  color: AppTheme.textSecondary,
+                                  size: 18,
+                                ),
+                                items: team
+                                    .map(
+                                      (user) => DropdownMenuItem(
+                                        value: user,
+                                        child: Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 10,
+                                              backgroundColor: AppTheme.primary
+                                                  .withOpacity(0.2),
+                                              child: Text(
+                                                user.name[0].toUpperCase(),
+                                                style: const TextStyle(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppTheme.primary,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              user.name,
+                                              style: const TextStyle(
+                                                color: AppTheme.textPrimary,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (user) {
+                                  if (user != null) {
+                                    ref.read(authProvider.notifier).login(user);
+                                  }
+                                },
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -235,18 +267,26 @@ class AppSidebar extends StatelessWidget {
         scale: 1.02,
         onTap: onTap,
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary.withOpacity(0.12) : Colors.transparent,
+          color: isSelected
+              ? AppTheme.primary.withOpacity(0.12)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? AppTheme.primary.withOpacity(0.3) : Colors.transparent,
+            color: isSelected
+                ? AppTheme.primary.withOpacity(0.3)
+                : Colors.transparent,
             width: 1,
           ),
         ),
         hoverDecoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary.withOpacity(0.18) : Colors.black.withOpacity(0.03),
+          color: isSelected
+              ? AppTheme.primary.withOpacity(0.18)
+              : Colors.black.withOpacity(0.03),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? AppTheme.primary.withOpacity(0.4) : Colors.black.withOpacity(0.04),
+            color: isSelected
+                ? AppTheme.primary.withOpacity(0.4)
+                : Colors.black.withOpacity(0.04),
             width: 1,
           ),
         ),
@@ -263,7 +303,9 @@ class AppSidebar extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+                  color: isSelected
+                      ? AppTheme.textPrimary
+                      : AppTheme.textSecondary,
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
