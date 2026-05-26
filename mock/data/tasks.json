@@ -10,6 +10,7 @@
       "email": "john@sample.com"
     },
     "status": "To Do",
+    "source": "project",
     "projectId": "PRJ-01",
     "stageId": "STG-01",
     "activities": [
@@ -48,6 +49,7 @@
       "email": "james@sample.com"
     },
     "status": "In Progress",
+    "source": "project",
     "projectId": "PRJ-01",
     "stageId": "STG-02",
     "activities": [
@@ -80,6 +82,62 @@
           "name": "James Albert",
           "email": "james@sample.com"
         }
+      }
+    ]
+  },
+  {
+    "id": "ISSUE-01",
+    "title": "Triage homepage bug report",
+    "description": "Review the latest customer issue and confirm whether it needs product or engineering follow-up.",
+    "dueDate": "2026-05-26T15:00:00.000",
+    "assignee": {
+      "id": "maria",
+      "name": "Maria Santos",
+      "email": "maria@sample.com"
+    },
+    "status": "To Do",
+    "source": "issue",
+    "projectId": null,
+    "stageId": null,
+    "activities": [
+      {
+        "id": "ACT-MOCK-5",
+        "text": "Issue came in through the support inbox and needs a quick first pass.",
+        "author": {
+          "id": "john",
+          "name": "John Robert",
+          "email": "john@sample.com"
+        },
+        "timestamp": "2026-05-25T13:15:00.000",
+        "type": "comment",
+        "action": "commented"
+      }
+    ]
+  },
+  {
+    "id": "ISSUE-02",
+    "title": "Prepare weekly client follow-up",
+    "description": "Draft the customer update summary that goes out every Friday afternoon.",
+    "dueDate": "2026-05-30T10:00:00.000",
+    "assignee": null,
+    "status": "Done",
+    "source": "issue",
+    "projectId": null,
+    "stageId": null,
+    "activities": [
+      {
+        "id": "ACT-MOCK-6",
+        "author": {
+          "id": "james",
+          "name": "James Albert",
+          "email": "james@sample.com"
+        },
+        "timestamp": "2026-05-24T17:45:00.000",
+        "type": "history",
+        "action": "updated",
+        "field": "status",
+        "oldValue": "In Progress",
+        "newValue": "Done"
       }
     ]
   }

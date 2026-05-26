@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:task_manager_flutter/environment/environment.dart';
 import '../../users/state/user_provider.dart';
 import '../../users/model/user_model.dart';
 import '../model/domain/task_activity_model.dart';
@@ -61,6 +62,12 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
     _isInitialized = true;
     _hasChanges = false;
     _shouldClearAssignee = false;
+
+    if (!Environment().config.useMockData) {
+      Future<void>.microtask(() {
+        ref.read(taskListProvider.notifier).refreshTaskDetails(widget.taskId);
+      });
+    }
   }
 
   void _markAsChanged() {
@@ -424,7 +431,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                               _buildSidebarField(
                                 label: 'Assignee',
                                 child: InkWell(
-                                  onTap: () => _showAssigneePicker(context),
+                                  onTap: Environment().config.useMockData
+                                      ? () => _showAssigneePicker(context)
+                                      : null,
                                   borderRadius: BorderRadius.circular(6),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -473,8 +482,10 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                             color: AppTheme.textSecondary,
                                           ),
                                           const SizedBox(width: 8),
-                                          const Text(
-                                            'Assign task',
+                                          Text(
+                                            Environment().config.useMockData
+                                                ? 'Assign task'
+                                                : 'User integration pending',
                                             style: TextStyle(
                                               color: AppTheme.textSecondary,
                                               fontSize: 12,
@@ -879,6 +890,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   }
 
   void _showAssigneePicker(BuildContext context) {
+    if (!Environment().config.useMockData) {
+      return;
+    }
     final teamAsync = ref.read(teamProvider);
 
     showDialog(

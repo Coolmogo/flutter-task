@@ -6,6 +6,7 @@ import 'package:task_manager_flutter/core/tasks/domain/task_activity_model.dart'
 import 'package:task_manager_flutter/core/tasks/domain/task_model.dart';
 import 'package:task_manager_flutter/core/tasks/service/task_service.dart';
 import 'package:task_manager_flutter/core/users/domain/user_model.dart';
+import 'package:task_manager_flutter/environment/environment.dart';
 import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
 import 'package:task_manager_flutter/features/projects/state/project_list_provider.dart';
 
@@ -66,60 +67,26 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     state = const AsyncValue.loading();
     await Future<void>.delayed(const Duration(milliseconds: 200));
 
-    String newTaskId;
-    if (projectId == null || projectId.isEmpty) {
-      var nextNum = 1;
-      for (final task in currentTasks) {
-        if (task.projectId == null || task.projectId!.isEmpty) {
-          final parts = task.id.split('-');
-          if (parts.length > 1) {
-            final parsed = int.tryParse(parts[parts.length - 1]);
-            if (parsed != null && parsed >= nextNum) {
-              nextNum = parsed + 1;
-            }
-          }
-        }
-      }
-      newTaskId = 'TASK-${nextNum.toString().padLeft(2, '0')}';
-    } else {
-      final projects = ref.read(projectListProvider).value ?? [];
-      final project = projects.firstWhere(
-        (item) => item.id == projectId,
-        orElse: () => const Project(id: '', title: '', projectCode: 'TASK'),
+    try {
+      final newTask = Task(
+        id: _buildNextTaskId(currentTasks, projectId),
+        title: title,
+        description: description,
+        source: projectId == null || projectId.isEmpty
+            ? TaskSource.issue
+            : TaskSource.project,
+        projectId: projectId,
+        stageId: stageId,
+        status: initialStatus,
+        assignee: assignee,
+        dueDate: dueDate,
       );
-      final code = project.projectCode.isNotEmpty
-          ? project.projectCode
-          : 'TASK';
 
-      var nextNum = 1;
-      for (final task in currentTasks) {
-        if (task.projectId == projectId) {
-          final parts = task.id.split('-');
-          if (parts.length > 1) {
-            final parsed = int.tryParse(parts[parts.length - 1]);
-            if (parsed != null && parsed >= nextNum) {
-              nextNum = parsed + 1;
-            }
-          }
-        }
-      }
-      newTaskId = '$code-$nextNum';
+      final createdTask = await ref.read(taskServiceProvider).createTask(newTask);
+      state = AsyncValue.data([...currentTasks, createdTask]);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
     }
-
-    final newTask = Task(
-      id: newTaskId,
-      title: title,
-      description: description,
-      projectId: projectId,
-      stageId: stageId,
-      status: initialStatus,
-      assignee: assignee,
-      dueDate: dueDate,
-    );
-
-    final updated = [...currentTasks, newTask];
-    await ref.read(taskServiceProvider).saveTasks(updated);
-    state = AsyncValue.data(updated);
   }
 
   Future<void> updateTask(
@@ -139,26 +106,34 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     state = const AsyncValue.loading();
     await Future<void>.delayed(const Duration(milliseconds: 200));
 
-    final updated = currentTasks.map<Task>((task) {
-      if (task.id != taskId) {
-        return task;
+    Task? existingTask;
+    for (final task in currentTasks) {
+      if (task.id == taskId) {
+        existingTask = task;
+        break;
       }
+    }
+    if (existingTask == null) {
+      state = AsyncValue.data(currentTasks);
+      return;
+    }
 
-      final internalAuditTrail = [...task.activities];
+    try {
+      final internalAuditTrail = [...existingTask.activities];
       final normalizedExistingDescription = _normalizeDescription(
-        task.description,
+        existingTask.description,
       );
       final normalizedIncomingDescription = clearDescription
           ? null
           : _normalizeDescription(description);
       final shouldUpdateDescription = clearDescription || description != null;
 
-      if (title != null && title != task.title) {
+      if (title != null && title != existingTask.title) {
         internalAuditTrail.add(
           _createHistoryLog(
             action: ActivityAction.updated,
             field: 'title',
-            oldValue: task.title,
+            oldValue: existingTask.title,
             newValue: title,
           ),
         );
@@ -176,101 +151,120 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
         );
       }
 
-      if (clearDueDate && task.dueDate != null) {
+      if (clearDueDate && existingTask.dueDate != null) {
         internalAuditTrail.add(
           _createHistoryLog(
             action: ActivityAction.removed,
             field: 'dueDate',
-            oldValue: task.dueDate?.toIso8601String(),
+            oldValue: existingTask.dueDate?.toIso8601String(),
           ),
         );
-      } else if (dueDate != null && dueDate != task.dueDate) {
+      } else if (dueDate != null && dueDate != existingTask.dueDate) {
         internalAuditTrail.add(
           _createHistoryLog(
             action: ActivityAction.updated,
             field: 'dueDate',
-            oldValue: task.dueDate?.toIso8601String(),
+            oldValue: existingTask.dueDate?.toIso8601String(),
             newValue: dueDate.toIso8601String(),
           ),
         );
       }
 
-      if (clearAssignee && task.assignee != null) {
+      if (clearAssignee && existingTask.assignee != null) {
         internalAuditTrail.add(
           _createHistoryLog(
             action: ActivityAction.assigned,
             field: 'assignee',
-            oldValue: task.assignee?.toJson(),
+            oldValue: existingTask.assignee?.toJson(),
           ),
         );
-      } else if (assignee != null && assignee.id != task.assignee?.id) {
+      } else if (assignee != null && assignee.id != existingTask.assignee?.id) {
         internalAuditTrail.add(
           _createHistoryLog(
             action: ActivityAction.assigned,
             field: 'assignee',
-            oldValue: task.assignee?.toJson(),
+            oldValue: existingTask.assignee?.toJson(),
             newValue: assignee.toJson(),
           ),
         );
       }
 
-      if (status != null && status != task.status) {
+      if (status != null && status != existingTask.status) {
         internalAuditTrail.add(
           _createHistoryLog(
             action: ActivityAction.moved,
             field: 'status',
-            oldValue: task.status,
+            oldValue: existingTask.status,
             newValue: status,
           ),
         );
       }
 
-      if (stageId != null && stageId != task.stageId) {
+      if (stageId != null && stageId != existingTask.stageId) {
         internalAuditTrail.add(
           _createHistoryLog(
             action: ActivityAction.moved,
             field: 'stageId',
-            oldValue: task.stageId,
+            oldValue: existingTask.stageId,
             newValue: stageId,
           ),
         );
       }
 
-      return Task(
-        id: task.id,
-        title: title ?? task.title,
+      final updatedTask = Task(
+        id: existingTask.id,
+        title: title ?? existingTask.title,
         description: shouldUpdateDescription
             ? normalizedIncomingDescription
-            : task.description,
-        status: status ?? task.status,
-        stageId: stageId ?? task.stageId,
-        projectId: projectId ?? task.projectId,
-        dueDate: clearDueDate ? null : (dueDate ?? task.dueDate),
-        assignee: clearAssignee ? null : (assignee ?? task.assignee),
+            : existingTask.description,
+        dueDate: clearDueDate ? null : (dueDate ?? existingTask.dueDate),
+        assignee: clearAssignee ? null : (assignee ?? existingTask.assignee),
+        status: status ?? existingTask.status,
+        source: existingTask.source,
+        projectId: projectId ?? existingTask.projectId,
+        stageId: stageId ?? existingTask.stageId,
         activities: internalAuditTrail,
       );
-    }).toList();
 
-    await ref.read(taskServiceProvider).saveTasks(updated);
-    state = AsyncValue.data(updated);
+      final service = ref.read(taskServiceProvider);
+      final persistedTask = await service.updateTask(
+        updatedTask,
+        clearDueDate: clearDueDate,
+        clearAssignee: clearAssignee,
+      );
+      final activities = Environment().config.useMockData
+          ? internalAuditTrail
+          : await service.loadTaskActivity(taskId);
+      final finalTask = Task(
+        id: persistedTask.id,
+        title: persistedTask.title,
+        description: persistedTask.description,
+        dueDate: updatedTask.dueDate,
+        assignee: updatedTask.assignee ?? persistedTask.assignee,
+        status: persistedTask.status,
+        source: updatedTask.source,
+        projectId: updatedTask.projectId,
+        stageId: persistedTask.stageId ?? updatedTask.stageId,
+        activities: activities,
+      );
+
+      final updatedTasks = currentTasks
+          .map((task) => task.id == taskId ? finalTask : task)
+          .toList();
+      state = AsyncValue.data(updatedTasks);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   Future<void> toggleTaskStatus(String taskId) async {
-    final currentTasks = state.value ?? [];
-    state = const AsyncValue.loading();
-    await Future<void>.delayed(const Duration(milliseconds: 200));
+    final task = findTaskById(taskId);
+    if (task == null || task.id.isEmpty) {
+      return;
+    }
 
-    final updated = currentTasks.map((task) {
-      if (task.id != taskId) {
-        return task;
-      }
-
-      final nextStatus = task.status == 'Done' ? 'To Do' : 'Done';
-      return task.copyWith(status: nextStatus);
-    }).toList();
-
-    await ref.read(taskServiceProvider).saveTasks(updated);
-    state = AsyncValue.data(updated);
+    final nextStatus = task.status == 'Done' ? 'To Do' : 'Done';
+    await updateTask(taskId, status: nextStatus);
   }
 
   Future<void> addComment(String taskId, String commentText) async {
@@ -278,18 +272,34 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     state = const AsyncValue.loading();
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
-    final log = _createCommentLog(commentText);
+    try {
+      final service = ref.read(taskServiceProvider);
+      final log = Environment().config.useMockData
+          ? _createCommentLog(commentText)
+          : await service.addComment(taskId, commentText);
+      final taskActivities = Environment().config.useMockData
+          ? null
+          : await service.loadTaskActivity(taskId);
 
-    final updated = currentTasks.map<Task>((task) {
-      if (task.id != taskId) {
-        return task;
+      final updated = currentTasks.map<Task>((task) {
+        if (task.id != taskId) {
+          return task;
+        }
+
+        return task.copyWith(
+          activities: taskActivities ?? [...task.activities, log],
+        );
+      }).toList();
+
+      if (Environment().config.useMockData) {
+        final commentedTask = updated.firstWhere((task) => task.id == taskId);
+        await service.updateTask(commentedTask);
       }
 
-      return task.copyWith(activities: [...task.activities, log]);
-    }).toList();
-
-    await ref.read(taskServiceProvider).saveTasks(updated);
-    state = AsyncValue.data(updated);
+      state = AsyncValue.data(updated);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   Future<void> moveTask({
@@ -297,20 +307,11 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     required String? toStageId,
     required String targetStatus,
   }) async {
-    final currentTasks = state.value ?? [];
-    state = const AsyncValue.loading();
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-
-    final updated = currentTasks.map((task) {
-      if (task.id != taskId) {
-        return task;
-      }
-
-      return task.copyWith(stageId: toStageId, status: targetStatus);
-    }).toList();
-
-    await ref.read(taskServiceProvider).saveTasks(updated);
-    state = AsyncValue.data(updated);
+    await updateTask(
+      taskId,
+      stageId: toStageId,
+      status: targetStatus,
+    );
   }
 
   Future<void> deleteTask(String taskId) async {
@@ -318,9 +319,13 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
     state = const AsyncValue.loading();
     await Future<void>.delayed(const Duration(milliseconds: 200));
 
-    final updated = currentTasks.where((task) => task.id != taskId).toList();
-    await ref.read(taskServiceProvider).saveTasks(updated);
-    state = AsyncValue.data(updated);
+    try {
+      await ref.read(taskServiceProvider).deleteTask(taskId);
+      final updated = currentTasks.where((task) => task.id != taskId).toList();
+      state = AsyncValue.data(updated);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   Task? findTaskById(String taskId) {
@@ -332,6 +337,70 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
       (task) => task.id == taskId,
       orElse: () => const Task(id: '', title: ''),
     );
+  }
+
+  Future<void> refreshTaskDetails(String taskId) async {
+    final currentTasks = state.value ?? [];
+    if (Environment().config.useMockData) {
+      return;
+    }
+
+    try {
+      final activities = await ref.read(taskServiceProvider).loadTaskActivity(taskId);
+      final updated = currentTasks.map((task) {
+        if (task.id != taskId) {
+          return task;
+        }
+
+        return task.copyWith(activities: activities);
+      }).toList();
+      state = AsyncValue.data(updated);
+    } catch (_) {
+      state = AsyncValue.data(currentTasks);
+    }
+  }
+
+  String _buildNextTaskId(List<Task> currentTasks, String? projectId) {
+    if (!Environment().config.useMockData) {
+      return DateTime.now().microsecondsSinceEpoch.toString();
+    }
+
+    if (projectId == null || projectId.isEmpty) {
+      var nextNum = 1;
+      for (final task in currentTasks) {
+        if (task.projectId == null || task.projectId!.isEmpty) {
+          final parts = task.id.split('-');
+          if (parts.length > 1) {
+            final parsed = int.tryParse(parts[parts.length - 1]);
+            if (parsed != null && parsed >= nextNum) {
+              nextNum = parsed + 1;
+            }
+          }
+        }
+      }
+      return 'TASK-${nextNum.toString().padLeft(2, '0')}';
+    }
+
+    final projects = ref.read(projectListProvider).value ?? [];
+    final project = projects.firstWhere(
+      (item) => item.id == projectId,
+      orElse: () => const Project(id: '', title: '', projectCode: 'TASK'),
+    );
+    final code = project.projectCode.isNotEmpty ? project.projectCode : 'TASK';
+
+    var nextNum = 1;
+    for (final task in currentTasks) {
+      if (task.projectId == projectId) {
+        final parts = task.id.split('-');
+        if (parts.length > 1) {
+          final parsed = int.tryParse(parts[parts.length - 1]);
+          if (parsed != null && parsed >= nextNum) {
+            nextNum = parsed + 1;
+          }
+        }
+      }
+    }
+    return '$code-$nextNum';
   }
 }
 

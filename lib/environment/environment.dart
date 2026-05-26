@@ -18,6 +18,8 @@ class Environment {
   static const prod = 'PROD';
   static const dev = 'DEV';
   static const design = 'DESIGN';
+  static const devApiBaseUrl = 'https://task-mcp-cli-tool.onrender.com';
+  static const prodApiBaseUrl = 'https://task-mcp-cli-tool.onrender.com';
 
   static final Environment _instance = Environment._();
 
@@ -25,9 +27,9 @@ class Environment {
 
   EnvironmentConfig _config = const EnvironmentConfig(
     name: design,
-    apiBaseUrl: '',
+    apiBaseUrl: devApiBaseUrl,
     isDebug: true,
-    useMockData: true,
+    useMockData: false,
   );
 
   EnvironmentConfig get config => _config;
@@ -37,7 +39,7 @@ class Environment {
       case prod:
         _config = const EnvironmentConfig(
           name: prod,
-          apiBaseUrl: '',
+          apiBaseUrl: prodApiBaseUrl,
           isDebug: false,
           useMockData: false,
         );
@@ -45,7 +47,7 @@ class Environment {
       case dev:
         _config = const EnvironmentConfig(
           name: dev,
-          apiBaseUrl: '',
+          apiBaseUrl: devApiBaseUrl,
           isDebug: true,
           useMockData: false,
         );
@@ -54,9 +56,9 @@ class Environment {
       default:
         _config = const EnvironmentConfig(
           name: design,
-          apiBaseUrl: '',
+          apiBaseUrl: devApiBaseUrl,
           isDebug: true,
-          useMockData: true,
+          useMockData: false,
         );
     }
   }

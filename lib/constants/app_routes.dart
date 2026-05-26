@@ -4,4 +4,5 @@ abstract final class AppRoutes {
   static const projectBoard = 'board';
   static const tasks = '/tasks';
   static const team = '/team';
+  static const settings = '/settings';
 }
