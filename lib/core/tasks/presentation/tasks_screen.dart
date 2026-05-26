@@ -125,12 +125,19 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               currentUser,
                             );
 
-                            if (sections.every((section) => section.tasks.isEmpty)) {
+                            if (sections.every(
+                              (section) => section.tasks.isEmpty,
+                            )) {
                               return _buildEmptyState();
                             }
 
                             return ListView(
-                              padding: const EdgeInsets.fromLTRB(40, 24, 40, 32),
+                              padding: const EdgeInsets.fromLTRB(
+                                40,
+                                24,
+                                40,
+                                32,
+                              ),
                               children: [
                                 _buildDashboardIntro(filteredTasks),
                                 const SizedBox(height: 24),
@@ -187,7 +194,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final projectWork = tasks
         .where(
           (task) =>
-              task.source == TaskSource.project && !assignedIds.contains(task.id),
+              task.source == TaskSource.project &&
+              !assignedIds.contains(task.id),
         )
         .toList();
 
@@ -198,8 +206,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         )
         .toList();
 
-    final firstSectionTitle =
-        _selectedStatus == 'Done' ? 'Assigned to you' : 'Needs your attention';
+    final firstSectionTitle = _selectedStatus == 'Done'
+        ? 'Assigned to you'
+        : 'Needs your attention';
     final firstSectionSubtitle = _selectedStatus == 'Done'
         ? 'Completed work you were directly responsible for.'
         : 'Your current queue across project work and issues.';
@@ -223,7 +232,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       ),
       _TaskSectionData(
         title: 'Issues',
-        subtitle: 'Standalone operational work that is not part of a project.',
+        subtitle: 'Operational tasks handled outside of a formal project.',
         icon: Icons.bolt_rounded,
         accent: AppTheme.secondary,
         tasks: issueWork,
@@ -307,9 +316,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       .map(
                         (status) => DropdownMenuItem(
                           value: status,
-                          child: Text(
-                            status == 'All' ? 'Active work' : status,
-                          ),
+                          child: Text(status == 'All' ? 'Active work' : status),
                         ),
                       )
                       .toList(),
@@ -1011,8 +1018,9 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                   DropdownButtonFormField<User?>(
                     value: _selectedAssignee,
                     decoration: InputDecoration(
-                      labelText:
-                          teamAsync.isLoading ? 'Loading assignees...' : 'Assignee',
+                      labelText: teamAsync.isLoading
+                          ? 'Loading assignees...'
+                          : 'Assignee',
                       labelStyle: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 13,
@@ -1113,8 +1121,10 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                   dropdownColor: AppTheme.cardColor,
                   items: const ['To Do', 'In Progress', 'Done']
                       .map(
-                        (status) =>
-                            DropdownMenuItem(value: status, child: Text(status)),
+                        (status) => DropdownMenuItem(
+                          value: status,
+                          child: Text(status),
+                        ),
                       )
                       .toList(),
                   onChanged: (value) {
@@ -1150,7 +1160,9 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
             onPressed: () async {
               if (_formKey.currentState?.validate() ?? false) {
                 Navigator.pop(context);
-                await ref.read(taskListProvider.notifier).addTask(
+                await ref
+                    .read(taskListProvider.notifier)
+                    .addTask(
                       title: _titleController.text.trim(),
                       description: _descController.text.trim().isEmpty
                           ? null
