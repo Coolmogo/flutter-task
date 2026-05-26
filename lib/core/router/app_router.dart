@@ -9,7 +9,7 @@ import 'package:task_manager_flutter/features/projects/sub_features/project_deta
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: AppRoutes.projects,
+    initialLocation: AppRoutes.tasks,
     routes: [
       GoRoute(
         path: AppRoutes.projects,
@@ -49,6 +49,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.team,
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: TeamScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: TasksScreen()),
       ),
     ],
   );

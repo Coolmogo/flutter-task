@@ -202,8 +202,11 @@ class ProjectListScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   PageHeader(
-                    title: 'Projects Workspace',
-                    breadcrumbs: [BreadcrumbItem(label: 'Workspace')],
+                    title: 'Projects',
+                    breadcrumbs: [
+                      BreadcrumbItem(label: 'Tasks', route: '/tasks'),
+                      BreadcrumbItem(label: 'Projects'),
+                    ],
                     actions: [
                       HoverContainer(
                         scale: 1.05,
@@ -259,7 +262,7 @@ class ProjectListScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 16),
                                 const Text(
-                                  'No projects found in this workspace.',
+                                  'No projects yet. Create one when a stream of work needs its own board.',
                                   style: TextStyle(
                                     color: AppTheme.textSecondary,
                                     fontSize: 16,

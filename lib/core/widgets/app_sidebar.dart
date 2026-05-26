@@ -17,6 +17,7 @@ class AppSidebar extends StatelessWidget {
         location == '/' || location.startsWith('/project');
     final bool isTasksActive = location == '/tasks';
     final bool isTeamActive = location == '/team';
+    final bool isSettingsActive = location.startsWith('/settings');
 
     return Container(
       width: 260,
@@ -76,17 +77,17 @@ class AppSidebar extends StatelessWidget {
           // Sidebar Navigation Items
           _sidebarItem(
             context,
-            Icons.grid_view_rounded,
-            'Projects',
-            isSelected: isProjectsActive,
-            onTap: () => context.go('/'),
-          ),
-          _sidebarItem(
-            context,
             Icons.task_alt_rounded,
             'Tasks',
             isSelected: isTasksActive,
             onTap: () => context.go('/tasks'),
+          ),
+          _sidebarItem(
+            context,
+            Icons.grid_view_rounded,
+            'Projects',
+            isSelected: isProjectsActive,
+            onTap: () => context.go('/'),
           ),
           _sidebarItem(
             context,
@@ -245,8 +246,8 @@ class AppSidebar extends StatelessWidget {
             context,
             Icons.settings_suggest_rounded,
             'Settings',
-            isSelected: location.startsWith('/settings'),
-            onTap: () {},
+            isSelected: isSettingsActive,
+            onTap: () => context.go('/settings'),
           ),
           const SizedBox(height: 30),
         ],

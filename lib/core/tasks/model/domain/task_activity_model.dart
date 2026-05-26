@@ -96,6 +96,55 @@ class ActivityLog {
     );
   }
 
+  factory ActivityLog.fromBackendActivityJson(Map<String, dynamic> json) {
+    final authorJson = json['author'];
+    final authorId = json['author_id'];
+    final legacyAuthorName = json['legacy_author_name'] as String?;
+    final typeName = (json['type'] as String? ?? 'history').toLowerCase();
+    final actionName = json['action'] as String?;
+
+    return ActivityLog(
+      id: json['id'].toString(),
+      text: json['text'] as String?,
+      author: authorJson is Map<String, dynamic>
+          ? User.fromJson(authorJson)
+          : (authorId != null
+                ? User(id: authorId.toString(), name: 'User #$authorId')
+                : null),
+      legacyAuthorName: legacyAuthorName == 'System' ? null : legacyAuthorName,
+      timestamp: DateTime.parse(
+        (json['created_at'] ?? json['timestamp']) as String,
+      ),
+      type: typeName == 'comment' ? ActivityType.comment : ActivityType.history,
+      action: _parseBackendAction(actionName, typeName),
+      field: _normalizeBackendField(json['field'] as String?),
+      oldValue: json['old_value'] ?? json['oldValue'],
+      newValue: json['new_value'] ?? json['newValue'],
+    );
+  }
+
+  factory ActivityLog.fromBackendCommentJson(Map<String, dynamic> json) {
+    final authorJson = json['author'];
+    final authorId = json['author_id'];
+    final legacyAuthorName = json['legacy_author_name'] as String?;
+
+    return ActivityLog(
+      id: 'comment-${json['id']}',
+      text: json['text'] as String? ?? '',
+      author: authorJson is Map<String, dynamic>
+          ? User.fromJson(authorJson)
+          : (authorId != null
+                ? User(id: authorId.toString(), name: 'User #$authorId')
+                : null),
+      legacyAuthorName: legacyAuthorName == 'System' ? null : legacyAuthorName,
+      timestamp: DateTime.parse(
+        (json['created_at'] ?? json['timestamp']) as String,
+      ),
+      type: ActivityType.comment,
+      action: ActivityAction.commented,
+    );
+  }
+
   static ActivityAction _parseAction(String? actionName, ActivityType type) {
     if (actionName != null) {
       for (final action in ActivityAction.values) {
@@ -109,6 +158,43 @@ class ActivityLog {
     return type == ActivityType.comment
         ? ActivityAction.commented
         : ActivityAction.updated;
+  }
+
+  static ActivityAction _parseBackendAction(
+    String? actionName,
+    String typeName,
+  ) {
+    final normalized = actionName?.toLowerCase();
+    switch (normalized) {
+      case 'commented':
+        return ActivityAction.commented;
+      case 'updated':
+        return ActivityAction.updated;
+      case 'removed':
+        return ActivityAction.removed;
+      case 'assigned':
+        return ActivityAction.assigned;
+      case 'moved':
+        return ActivityAction.moved;
+      default:
+        return typeName == 'comment'
+            ? ActivityAction.commented
+            : ActivityAction.updated;
+    }
+  }
+
+  static String? _normalizeBackendField(String? field) {
+    switch (field) {
+      case 'due':
+      case 'due_date':
+        return 'dueDate';
+      case 'assignee_id':
+        return 'assignee';
+      case 'stage_id':
+        return 'stageId';
+      default:
+        return field;
+    }
   }
 
   static String _fieldLabel(String? field) {

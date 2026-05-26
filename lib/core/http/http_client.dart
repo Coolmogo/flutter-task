@@ -1,12 +1,28 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:task_manager_flutter/core/http/interceptors.dart';
 
-class AppHttpClient {
-  final String baseUrl;
-  final Ref ref;
+Dio buildHttpClient({required String baseUrl, required Ref ref}) {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 15),
+      headers: const {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    ),
+  );
 
-  const AppHttpClient({required this.baseUrl, required this.ref});
-}
+  dio.interceptors.addAll([
+    AppInterceptors(
+      ref: ref,
+      enableLogging: kDebugMode,
+    ),
+  ]);
 
-AppHttpClient buildHttpClient({required String baseUrl, required Ref ref}) {
-  return AppHttpClient(baseUrl: baseUrl, ref: ref);
+  return dio;
 }

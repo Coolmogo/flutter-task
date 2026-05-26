@@ -1,6 +1,6 @@
 {
   "installCommand": "git clone https://github.com/flutter/flutter.git --depth 1 -b stable _flutter && export PATH=\"$PATH:$PWD/_flutter/bin\"",
-  "buildCommand": "_flutter/bin/flutter build web --release",
+  "buildCommand": "_flutter/bin/flutter build web --release --dart-define=ENVIRONMENT=DEV",
   "outputDirectory": "build/web",
   "rewrites": [
     {
