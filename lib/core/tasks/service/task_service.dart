@@ -210,9 +210,9 @@ class HttpTaskService implements TaskService {
     bool clearDueDate = false,
     bool clearAssignee = false,
   }) async {
-    final taskId = int.tryParse(task.id);
-    if (taskId == null) {
-      throw const ApiException('Task id must be numeric for backend updates.');
+    final taskId = task.id.trim();
+    if (taskId.isEmpty) {
+      throw const ApiException('Task id is required for backend updates.');
     }
 
     final assigneeId = clearAssignee
@@ -226,7 +226,7 @@ class HttpTaskService implements TaskService {
 
     try {
       final response = await _dio.patch<Map<String, dynamic>>(
-        '/$taskId',
+        _taskPath(taskId),
         data: {
           'title': task.title,
           'description': task.description,
@@ -261,13 +261,13 @@ class HttpTaskService implements TaskService {
 
   @override
   Future<void> deleteTask(String taskId) async {
-    final parsedTaskId = int.tryParse(taskId);
-    if (parsedTaskId == null) {
-      throw const ApiException('Task id must be numeric for backend deletes.');
+    final normalizedTaskId = taskId.trim();
+    if (normalizedTaskId.isEmpty) {
+      throw const ApiException('Task id is required for backend deletes.');
     }
 
     try {
-      await _dio.delete<void>('/$parsedTaskId');
+      await _dio.delete<void>(_taskPath(normalizedTaskId));
     } on DioException catch (error) {
       final apiError = error.error;
       if (apiError is ApiException) {
@@ -280,15 +280,15 @@ class HttpTaskService implements TaskService {
 
   @override
   Future<List<ActivityLog>> loadTaskActivity(String taskId) async {
-    final parsedTaskId = int.tryParse(taskId);
-    if (parsedTaskId == null) {
-      throw const ApiException('Task id must be numeric for backend activity.');
+    final normalizedTaskId = taskId.trim();
+    if (normalizedTaskId.isEmpty) {
+      throw const ApiException('Task id is required for backend activity.');
     }
 
     try {
       final responses = await Future.wait([
-        _dio.get<List<dynamic>>('/$parsedTaskId/comments'),
-        _dio.get<List<dynamic>>('/$parsedTaskId/activities'),
+        _dio.get<List<dynamic>>(_taskPath(normalizedTaskId, 'comments')),
+        _dio.get<List<dynamic>>(_taskPath(normalizedTaskId, 'activities')),
       ]);
 
       final comments = responses[0].data ?? const <dynamic>[];
@@ -320,14 +320,14 @@ class HttpTaskService implements TaskService {
 
   @override
   Future<ActivityLog> addComment(String taskId, String text) async {
-    final parsedTaskId = int.tryParse(taskId);
-    if (parsedTaskId == null) {
-      throw const ApiException('Task id must be numeric for backend comments.');
+    final normalizedTaskId = taskId.trim();
+    if (normalizedTaskId.isEmpty) {
+      throw const ApiException('Task id is required for backend comments.');
     }
 
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '/$parsedTaskId/comments',
+        _taskPath(normalizedTaskId, 'comments'),
         data: {'text': text},
       );
 
@@ -369,6 +369,15 @@ class HttpTaskService implements TaskService {
 
   String _formatDate(DateTime value) {
     return value.toIso8601String().split('T').first;
+  }
+
+  String _taskPath(String taskId, [String? suffix]) {
+    final encodedTaskId = Uri.encodeComponent(taskId);
+    if (suffix == null || suffix.isEmpty) {
+      return '/$encodedTaskId';
+    }
+
+    return '/$encodedTaskId/$suffix';
   }
 }
 
