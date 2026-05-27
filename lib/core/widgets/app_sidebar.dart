@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:task_manager_flutter/core/auth/auth_controller.dart';
 import 'package:task_manager_flutter/core/users/state/user_provider.dart';
 import 'package:task_manager_flutter/core/users/model/user_model.dart';
@@ -49,7 +50,7 @@ class AppSidebar extends StatelessWidget {
                     ],
                   ),
                   child: const Icon(
-                    Icons.rocket_launch,
+                    LucideIcons.rocket,
                     color: Colors.white,
                     size: 22,
                   ),
@@ -77,21 +78,21 @@ class AppSidebar extends StatelessWidget {
           // Sidebar Navigation Items
           _sidebarItem(
             context,
-            Icons.task_alt_rounded,
+            LucideIcons.listTodo,
             'Tasks',
             isSelected: isTasksActive,
             onTap: () => context.go('/tasks'),
           ),
           _sidebarItem(
             context,
-            Icons.grid_view_rounded,
+            LucideIcons.layoutGrid,
             'Projects',
             isSelected: isProjectsActive,
             onTap: () => context.go('/'),
           ),
           _sidebarItem(
             context,
-            Icons.people_alt_rounded,
+            LucideIcons.users,
             'Team',
             isSelected: isTeamActive,
             onTap: () => context.go('/team'),
@@ -186,7 +187,7 @@ class AppSidebar extends StatelessWidget {
                                 ),
                                 dropdownColor: AppTheme.sidebarColor,
                                 icon: const Icon(
-                                  Icons.swap_vert_rounded,
+                                  LucideIcons.arrowUpDown,
                                   color: AppTheme.textSecondary,
                                   size: 18,
                                 ),
@@ -244,7 +245,7 @@ class AppSidebar extends StatelessWidget {
           // Settings Section
           _sidebarItem(
             context,
-            Icons.settings_suggest_rounded,
+            LucideIcons.settings2,
             'Settings',
             isSelected: isSettingsActive,
             onTap: () => context.go('/settings'),

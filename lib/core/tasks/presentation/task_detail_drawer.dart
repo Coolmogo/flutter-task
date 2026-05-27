@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:task_manager_flutter/environment/environment.dart';
 import '../../users/state/user_provider.dart';
 import '../../users/model/user_model.dart';
@@ -206,7 +207,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                               const Row(
                                 children: [
                                   Icon(
-                                    Icons.subject_rounded,
+                                    LucideIcons.text,
                                     size: 18,
                                     color: AppTheme.primary,
                                   ),
@@ -260,7 +261,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                               const Row(
                                 children: [
                                   Icon(
-                                    Icons.chat_bubble_outline_rounded,
+                                    LucideIcons.messageSquare,
                                     size: 18,
                                     color: AppTheme.primary,
                                   ),
@@ -335,7 +336,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                     child: DropdownButton<String>(
                                       value: _selectedStatus ?? task.status,
                                       icon: const Icon(
-                                        Icons.arrow_drop_down,
+                                        LucideIcons.chevronDown,
                                         size: 16,
                                         color: AppTheme.textSecondary,
                                       ),
@@ -407,7 +408,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const Icon(
-                                          Icons.calendar_today_rounded,
+                                          LucideIcons.calendar,
                                           size: 12,
                                           color: AppTheme.textSecondary,
                                         ),
@@ -477,7 +478,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                           ),
                                         ] else ...[
                                           const Icon(
-                                            Icons.person_outline_rounded,
+                                            LucideIcons.userRound,
                                             size: 12,
                                             color: AppTheme.textSecondary,
                                           ),
@@ -524,7 +525,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
           Row(
             children: [
               const Icon(
-                Icons.task_alt_rounded,
+                LucideIcons.listTodo,
                 color: AppTheme.primary,
                 size: 18,
               ),
@@ -555,7 +556,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                   tooltip: 'Delete Task',
                   onPressed: () => _confirmDelete(context),
                   icon: const Icon(
-                    Icons.delete_outline_rounded,
+                    LucideIcons.trash2,
                     color: Colors.redAccent,
                     size: 20,
                   ),
@@ -565,7 +566,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
               IconButton(
                 onPressed: () => _cancelChanges(task),
                 icon: const Icon(
-                  Icons.close_rounded,
+                  LucideIcons.x,
                   color: AppTheme.textPrimary,
                 ),
               ),
@@ -934,7 +935,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                 if (index == team.length) {
                   return ListTile(
                     leading: const Icon(
-                      Icons.person_remove_outlined,
+                      LucideIcons.userMinus,
                       color: Colors.redAccent,
                     ),
                     title: const Text(

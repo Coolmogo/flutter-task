@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:task_manager_flutter/core/auth/auth_controller.dart';
 import 'package:task_manager_flutter/environment/environment.dart';
 import 'package:task_manager_flutter/core/tasks/model/domain/task_model.dart';
@@ -72,7 +73,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         child: ElevatedButton.icon(
                           onPressed: () => _showCreateTaskDialog(context),
                           icon: const Icon(
-                            Icons.add_rounded,
+                            LucideIcons.plus,
                             size: 18,
                             color: Colors.white,
                           ),
@@ -239,7 +240,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     fontSize: 13,
                   ),
                   prefixIcon: const Icon(
-                    Icons.search_rounded,
+                    LucideIcons.search,
                     size: 18,
                     color: AppTheme.textSecondary,
                   ),
@@ -269,7 +270,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                   icon: const Icon(
-                    Icons.filter_list_rounded,
+                    LucideIcons.listFilter,
                     size: 16,
                     color: AppTheme.textSecondary,
                   ),
@@ -345,19 +346,19 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             runSpacing: 10,
             children: [
               _buildCountPill(
-                icon: Icons.waving_hand_rounded,
+                icon: LucideIcons.userRound,
                 label: 'My tasks',
                 count: myTaskCount,
                 color: AppTheme.statusProgress,
               ),
               _buildCountPill(
-                icon: Icons.folder_open_rounded,
+                icon: LucideIcons.folderOpen,
                 label: 'Projects',
                 count: projectCount,
                 color: AppTheme.primary,
               ),
               _buildCountPill(
-                icon: Icons.bolt_rounded,
+                icon: LucideIcons.bolt,
                 label: 'Issues',
                 count: issueCount,
                 color: AppTheme.secondary,
@@ -565,14 +566,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   IconData _scopeIcon(String scope) {
     switch (scope) {
       case 'My Tasks':
-        return Icons.waving_hand_rounded;
+        return LucideIcons.userRound;
       case 'Projects':
-        return Icons.folder_open_rounded;
+        return LucideIcons.folderOpen;
       case 'Issues':
-        return Icons.bolt_rounded;
+        return LucideIcons.bolt;
       case 'All':
       default:
-        return Icons.dashboard_customize_rounded;
+        return LucideIcons.layoutDashboard;
     }
   }
 
@@ -587,7 +588,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.inbox_rounded,
+              LucideIcons.inbox,
               size: 64,
               color: AppTheme.textSecondary.withOpacity(0.28),
             ),
@@ -704,14 +705,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     children: [
                       if (task.dueDate != null)
                         _buildMetaPill(
-                          icon: Icons.calendar_today_rounded,
+                          icon: LucideIcons.calendar,
                           label:
                               '${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}',
                         ),
                       _buildMetaPill(
                         icon: isIssue
-                            ? Icons.bolt_rounded
-                            : Icons.account_tree_rounded,
+                            ? LucideIcons.bolt
+                            : LucideIcons.gitBranch,
                         label: isIssue
                             ? 'Standalone issue'
                             : 'Linked to a project stream',
@@ -748,7 +749,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       radius: 14,
                       backgroundColor: Colors.transparent,
                       child: Icon(
-                        Icons.person_outline_rounded,
+                        LucideIcons.userRound,
                         size: 18,
                         color: AppTheme.textSecondary,
                       ),
@@ -802,7 +803,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              Icons.folder_open_rounded,
+              LucideIcons.folderOpen,
               size: 12,
               color: AppTheme.primary,
             ),
@@ -832,7 +833,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.bolt_rounded, size: 12, color: AppTheme.secondary),
+          Icon(LucideIcons.bolt, size: 12, color: AppTheme.secondary),
           SizedBox(width: 6),
           Text(
             'Issue',
@@ -1171,7 +1172,7 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
                           ),
                         ),
                         const Icon(
-                          Icons.calendar_today_rounded,
+                          LucideIcons.calendar,
                           size: 16,
                           color: AppTheme.textSecondary,
                         ),

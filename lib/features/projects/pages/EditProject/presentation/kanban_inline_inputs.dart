@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:task_manager_flutter/core/tasks/state/task_provider.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'package:task_manager_flutter/core/widgets/hover_container.dart';
@@ -70,7 +71,7 @@ class _InlineAddStageColumnState extends State<InlineAddStageColumn> {
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                Icon(Icons.add_rounded, color: AppTheme.primary, size: 20),
+                Icon(LucideIcons.plus, color: AppTheme.primary, size: 20),
                 SizedBox(width: 10),
                 Text(
                   'Add another stage',
@@ -123,7 +124,7 @@ class _InlineAddStageColumnState extends State<InlineAddStageColumn> {
               children: [
                 IconButton(
                   icon: const Icon(
-                    Icons.close_rounded,
+                    LucideIcons.x,
                     size: 18,
                     color: AppTheme.textSecondary,
                   ),
@@ -198,7 +199,7 @@ class _InlineQuickAddTaskInputState extends State<InlineQuickAddTaskInput> {
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             child: Row(
               children: [
-                Icon(Icons.add_rounded, size: 16, color: AppTheme.primary),
+                Icon(LucideIcons.plus, size: 16, color: AppTheme.primary),
                 SizedBox(width: 8),
                 Text(
                   'Add a task',
@@ -254,7 +255,7 @@ class _InlineQuickAddTaskInputState extends State<InlineQuickAddTaskInput> {
                 children: [
                   IconButton(
                     icon: const Icon(
-                      Icons.close_rounded,
+                      LucideIcons.x,
                       size: 16,
                       color: AppTheme.textSecondary,
                     ),

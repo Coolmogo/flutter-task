@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../../../core/tasks/model/domain/task_model.dart';
 import 'package:task_manager_flutter/core/theme/app_theme.dart';
 import 'package:task_manager_flutter/core/widgets/hover_container.dart';
@@ -133,7 +134,7 @@ class KanbanTaskCard extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
-                              Icons.calendar_today_rounded,
+                              LucideIcons.calendar,
                               size: 11,
                               color: AppTheme.textSecondary,
                             ),

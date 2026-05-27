@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../../../core/widgets/app_sidebar.dart';
 import '../../../../../core/widgets/page_header.dart';
 import '../../../../../core/widgets/app_breadcrumbs.dart';
@@ -225,7 +226,7 @@ class ProjectListScreen extends ConsumerWidget {
                           ),
                           onPressed: () =>
                               _showCreateProjectDialog(context, ref),
-                          icon: const Icon(Icons.add_rounded, size: 20),
+                          icon: const Icon(LucideIcons.plus, size: 20),
                           label: const Text(
                             'Create Project',
                             style: TextStyle(fontWeight: FontWeight.bold),
@@ -254,7 +255,7 @@ class ProjectListScreen extends ConsumerWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
-                                  Icons.assignment_late_outlined,
+                                  LucideIcons.folderOpen,
                                   size: 60,
                                   color: AppTheme.textSecondary.withOpacity(
                                     0.5,
@@ -355,7 +356,7 @@ class ProjectListScreen extends ConsumerWidget {
                                               ),
                                             ),
                                             Icon(
-                                              Icons.arrow_outward_rounded,
+                                              LucideIcons.arrowUpRight,
                                               size: 18,
                                               color: AppTheme.textSecondary
                                                   .withOpacity(0.5),

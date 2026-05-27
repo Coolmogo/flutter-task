@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:task_manager_flutter/core/tasks/state/task_provider.dart';
 import 'package:task_manager_flutter/features/projects/controller/project_controller.dart';
 import 'package:task_manager_flutter/features/projects/domain/project_model.dart';
@@ -100,7 +101,7 @@ class ProjectDetailScreen extends ConsumerWidget {
           scale: 1.05,
           child: OutlinedButton.icon(
             onPressed: () {},
-            icon: const Icon(Icons.edit_note_rounded, size: 18),
+            icon: const Icon(LucideIcons.penLine, size: 18),
             label: const Text('Edit Details'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppTheme.textPrimary,
@@ -127,7 +128,7 @@ class ProjectDetailScreen extends ConsumerWidget {
           Row(
             children: [
               const Icon(
-                Icons.description_outlined,
+                LucideIcons.fileText,
                 color: AppTheme.primary,
                 size: 20,
               ),
@@ -160,7 +161,7 @@ class ProjectDetailScreen extends ConsumerWidget {
         Row(
           children: [
             const Icon(
-              Icons.layers_outlined,
+              LucideIcons.layers3,
               color: AppTheme.primary,
               size: 20,
             ),
@@ -303,7 +304,7 @@ class ProjectDetailScreen extends ConsumerWidget {
                     onPressed: () => context.go(
                       '/project/$currentProjectId/board?stageId=${stage.id}',
                     ),
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                    icon: const Icon(LucideIcons.arrowRight, size: 16),
                     label: const Text(
                       'Open Board',
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -353,7 +354,7 @@ class ProjectDetailScreen extends ConsumerWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.add_circle_outline_rounded,
+                LucideIcons.circlePlus,
                 color: AppTheme.primary,
                 size: 28,
               ),

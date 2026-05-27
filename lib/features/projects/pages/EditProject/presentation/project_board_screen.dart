@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../../../core/widgets/app_sidebar.dart';
 import '../../../../../core/widgets/page_header.dart';
 import '../../../../../core/widgets/app_breadcrumbs.dart';
@@ -118,7 +119,7 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.layers_rounded,
+                                LucideIcons.layers3,
                                 color: AppTheme.textSecondary,
                                 size: 16,
                               ),
@@ -154,7 +155,7 @@ class _ProjectBoardScreenState extends ConsumerState<ProjectBoardScreen> {
                                   fontSize: 14,
                                 ),
                                 icon: const Icon(
-                                  Icons.arrow_drop_down_rounded,
+                                  LucideIcons.chevronDown,
                                   color: AppTheme.primary,
                                 ),
                                 items: project.stages.map((stage) {
