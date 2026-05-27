@@ -23,11 +23,19 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
+  static const List<String> _scopeFilters = [
+    'All',
+    'My Tasks',
+    'Projects',
+    'Issues',
+  ];
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Task? _selectedTaskForDrawer;
   String _searchText = '';
   String _selectedStatus = 'All';
+  String _selectedScope = 'All';
 
   @override
   Widget build(BuildContext context) {
@@ -120,16 +128,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           ),
                           data: (projects) {
                             final filteredTasks = _applyGlobalFilters(allTasks);
-                            final sections = _buildSections(
+                            final visibleTasks = _applyScopeFilters(
                               filteredTasks,
                               currentUser,
                             );
-
-                            if (sections.every(
-                              (section) => section.tasks.isEmpty,
-                            )) {
-                              return _buildEmptyState();
-                            }
 
                             return ListView(
                               padding: const EdgeInsets.fromLTRB(
@@ -139,17 +141,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                 32,
                               ),
                               children: [
-                                _buildDashboardIntro(filteredTasks),
+                                _buildDashboardIntro(
+                                  filteredTasks,
+                                  currentUser,
+                                ),
                                 const SizedBox(height: 24),
-                                for (final section in sections)
-                                  if (section.tasks.isNotEmpty) ...[
-                                    _buildTaskSection(
-                                      context: context,
-                                      section: section,
-                                      projects: projects,
-                                    ),
-                                    const SizedBox(height: 20),
-                                  ],
+                                _buildUnifiedTaskContainer(
+                                  context: context,
+                                  projects: projects,
+                                  filteredTasks: filteredTasks,
+                                  visibleTasks: visibleTasks,
+                                  currentUser: currentUser,
+                                ),
                               ],
                             );
                           },
@@ -184,60 +187,23 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     }).toList();
   }
 
-  List<_TaskSectionData> _buildSections(List<Task> tasks, User? currentUser) {
+  List<Task> _applyScopeFilters(List<Task> tasks, User? currentUser) {
     final currentUserId = currentUser?.id;
-    final assignedToCurrentUser = tasks
-        .where((task) => task.assignee?.id == currentUserId)
-        .toList();
-    final assignedIds = assignedToCurrentUser.map((task) => task.id).toSet();
-
-    final projectWork = tasks
-        .where(
-          (task) =>
-              task.source == TaskSource.project &&
-              !assignedIds.contains(task.id),
-        )
-        .toList();
-
-    final issueWork = tasks
-        .where(
-          (task) =>
-              task.source == TaskSource.issue && !assignedIds.contains(task.id),
-        )
-        .toList();
-
-    final firstSectionTitle = _selectedStatus == 'Done'
-        ? 'Assigned to you'
-        : 'Needs your attention';
-    final firstSectionSubtitle = _selectedStatus == 'Done'
-        ? 'Completed work you were directly responsible for.'
-        : 'Your current queue across project work and issues.';
-
-    return [
-      _TaskSectionData(
-        title: firstSectionTitle,
-        subtitle: firstSectionSubtitle,
-        icon: _selectedStatus == 'Done'
-            ? Icons.done_all_rounded
-            : Icons.waving_hand_rounded,
-        accent: AppTheme.primary,
-        tasks: assignedToCurrentUser,
-      ),
-      _TaskSectionData(
-        title: 'Project work',
-        subtitle: 'Tasks connected to a project board or delivery stream.',
-        icon: Icons.folder_open_rounded,
-        accent: AppTheme.primary,
-        tasks: projectWork,
-      ),
-      _TaskSectionData(
-        title: 'Issues',
-        subtitle: 'Operational tasks handled outside of a formal project.',
-        icon: Icons.bolt_rounded,
-        accent: AppTheme.secondary,
-        tasks: issueWork,
-      ),
-    ];
+    switch (_selectedScope) {
+      case 'My Tasks':
+        return tasks
+            .where((task) => task.assignee?.id == currentUserId)
+            .toList();
+      case 'Projects':
+        return tasks
+            .where((task) => task.source == TaskSource.project)
+            .toList();
+      case 'Issues':
+        return tasks.where((task) => task.source == TaskSource.issue).toList();
+      case 'All':
+      default:
+        return tasks;
+    }
   }
 
   Widget _buildFilterPanel(BuildContext context) {
@@ -329,7 +295,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  Widget _buildDashboardIntro(List<Task> filteredTasks) {
+  Widget _buildDashboardIntro(List<Task> filteredTasks, User? currentUser) {
+    final myTaskCount = _scopeCount('My Tasks', filteredTasks, currentUser);
     final projectCount = filteredTasks
         .where((task) => task.source == TaskSource.project)
         .length;
@@ -360,9 +327,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _selectedStatus == 'All'
-                      ? 'Project work and issues stay together here, with source shown clearly and the active queue surfaced first.'
-                      : 'Filtered to ${_selectedStatus.toLowerCase()} items so you can review one work state at a time.',
+                  _selectedScope == 'All'
+                      ? 'Project work and issues stay together here in one stream, with tags to quickly pivot between your queue and source-specific work.'
+                      : 'Showing ${_selectedScope.toLowerCase()} so you can review one lane of work without losing the shared context.',
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.5,
@@ -378,8 +345,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             runSpacing: 10,
             children: [
               _buildCountPill(
+                icon: Icons.waving_hand_rounded,
+                label: 'My tasks',
+                count: myTaskCount,
+                color: AppTheme.statusProgress,
+              ),
+              _buildCountPill(
                 icon: Icons.folder_open_rounded,
-                label: 'Project work',
+                label: 'Projects',
                 count: projectCount,
                 color: AppTheme.primary,
               ),
@@ -427,10 +400,29 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  Widget _buildTaskSection({
+  int _scopeCount(String scope, List<Task> tasks, User? currentUser) {
+    final currentUserId = currentUser?.id;
+    switch (scope) {
+      case 'My Tasks':
+        return tasks.where((task) => task.assignee?.id == currentUserId).length;
+      case 'Projects':
+        return tasks
+            .where((task) => task.source == TaskSource.project)
+            .length;
+      case 'Issues':
+        return tasks.where((task) => task.source == TaskSource.issue).length;
+      case 'All':
+      default:
+        return tasks.length;
+    }
+  }
+
+  Widget _buildUnifiedTaskContainer({
     required BuildContext context,
-    required _TaskSectionData section,
+    required List<Task> filteredTasks,
+    required List<Task> visibleTasks,
     required List<Project> projects,
+    required User? currentUser,
   }) {
     return Container(
       padding: const EdgeInsets.all(22),
@@ -442,96 +434,182 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            runSpacing: 12,
+            spacing: 12,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: section.accent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(section.icon, size: 18, color: section.accent),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
+              SizedBox(
+                width: 420,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      section.title,
-                      style: const TextStyle(
+                    const Text(
+                      'Unified work container',
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
-                      section.subtitle,
+                      'Use the tags to pivot between your queue, project-linked work, and standalone issues without leaving this board.',
                       style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textSecondary.withOpacity(0.9),
+                        height: 1.45,
                       ),
                     ),
                   ],
                 ),
               ),
               Text(
-                '${section.tasks.length} ${section.tasks.length == 1 ? 'task' : 'tasks'}',
+                '${visibleTasks.length} ${visibleTasks.length == 1 ? 'item' : 'items'}',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: section.accent,
+                  color: _scopeAccent(_selectedScope),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 18),
-          for (final task in section.tasks) ...[
-            _buildTaskCard(
-              context,
-              task,
-              projects.firstWhere(
-                (project) => project.id == task.projectId,
-                orElse: () => const Project(id: '', title: ''),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: _scopeFilters.map((scope) {
+              final isSelected = scope == _selectedScope;
+              final accent = _scopeAccent(scope);
+              return InkWell(
+                onTap: () => setState(() => _selectedScope = scope),
+                borderRadius: BorderRadius.circular(999),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? accent.withOpacity(0.12)
+                        : Colors.white.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: isSelected
+                          ? accent.withOpacity(0.4)
+                          : AppTheme.border.withOpacity(0.6),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _scopeIcon(scope),
+                        size: 14,
+                        color: accent,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$scope (${_scopeCount(scope, filteredTasks, currentUser)})',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected ? accent : AppTheme.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 18),
+          if (visibleTasks.isEmpty)
+            _buildEmptyState(
+              title: 'No matching work in this view.',
+              subtitle:
+                  'Try another tag or widen the search and status filters.',
+            )
+          else
+            for (final task in visibleTasks) ...[
+              _buildTaskCard(
+                context,
+                task,
+                projects.firstWhere(
+                  (project) => project.id == task.projectId,
+                  orElse: () => const Project(id: '', title: ''),
+                ),
               ),
-            ),
-            if (task != section.tasks.last) const SizedBox(height: 12),
-          ],
+              if (task != visibleTasks.last) const SizedBox(height: 12),
+            ],
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inbox_rounded,
-            size: 64,
-            color: AppTheme.textSecondary.withOpacity(0.28),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'No matching work right now.',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+  Color _scopeAccent(String scope) {
+    switch (scope) {
+      case 'My Tasks':
+        return AppTheme.statusProgress;
+      case 'Projects':
+        return AppTheme.primary;
+      case 'Issues':
+        return AppTheme.secondary;
+      case 'All':
+      default:
+        return AppTheme.textPrimary;
+    }
+  }
+
+  IconData _scopeIcon(String scope) {
+    switch (scope) {
+      case 'My Tasks':
+        return Icons.waving_hand_rounded;
+      case 'Projects':
+        return Icons.folder_open_rounded;
+      case 'Issues':
+        return Icons.bolt_rounded;
+      case 'All':
+      default:
+        return Icons.dashboard_customize_rounded;
+    }
+  }
+
+  Widget _buildEmptyState({
+    String title = 'No matching work right now.',
+    String subtitle = 'Try a different search or status filter to widen the view.',
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox_rounded,
+              size: 64,
+              color: AppTheme.textSecondary.withOpacity(0.28),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Try a different search or status filter to widen the view.',
-            style: TextStyle(
-              fontSize: 13,
-              color: AppTheme.textSecondary.withOpacity(0.8),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 13,
+                color: AppTheme.textSecondary.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1184,20 +1262,4 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
       ],
     );
   }
-}
-
-class _TaskSectionData {
-  const _TaskSectionData({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.accent,
-    required this.tasks,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color accent;
-  final List<Task> tasks;
 }
