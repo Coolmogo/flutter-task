@@ -99,6 +99,7 @@ class ActivityLog {
   factory ActivityLog.fromBackendActivityJson(Map<String, dynamic> json) {
     final authorJson = json['author'];
     final authorId = json['author_id'];
+    final authorType = json['author_type'] as String?;
     final legacyAuthorName = json['legacy_author_name'] as String?;
     final typeName = (json['type'] as String? ?? 'history').toLowerCase();
     final actionName = json['action'] as String?;
@@ -108,9 +109,11 @@ class ActivityLog {
       text: json['text'] as String?,
       author: authorJson is Map<String, dynamic>
           ? User.fromJson(authorJson)
-          : (authorId != null
-                ? User(id: authorId.toString(), name: 'User #$authorId')
-                : null),
+          : _backendUser(
+              authorId: authorId,
+              authorType: authorType,
+              legacyAuthorName: legacyAuthorName,
+            ),
       legacyAuthorName: legacyAuthorName == 'System' ? null : legacyAuthorName,
       timestamp: DateTime.parse(
         (json['created_at'] ?? json['timestamp']) as String,
@@ -126,16 +129,20 @@ class ActivityLog {
   factory ActivityLog.fromBackendCommentJson(Map<String, dynamic> json) {
     final authorJson = json['author'];
     final authorId = json['author_id'];
+    final authorType = json['author_type'] as String?;
     final legacyAuthorName = json['legacy_author_name'] as String?;
+    final content = json['content'] as String?;
 
     return ActivityLog(
       id: 'comment-${json['id']}',
-      text: json['text'] as String? ?? '',
+      text: content ?? json['text'] as String? ?? '',
       author: authorJson is Map<String, dynamic>
           ? User.fromJson(authorJson)
-          : (authorId != null
-                ? User(id: authorId.toString(), name: 'User #$authorId')
-                : null),
+          : _backendUser(
+              authorId: authorId,
+              authorType: authorType,
+              legacyAuthorName: legacyAuthorName,
+            ),
       legacyAuthorName: legacyAuthorName == 'System' ? null : legacyAuthorName,
       timestamp: DateTime.parse(
         (json['created_at'] ?? json['timestamp']) as String,
@@ -143,6 +150,31 @@ class ActivityLog {
       type: ActivityType.comment,
       action: ActivityAction.commented,
     );
+  }
+
+  static User? _backendUser({
+    required Object? authorId,
+    required String? authorType,
+    required String? legacyAuthorName,
+  }) {
+    if (authorId == null) {
+      return null;
+    }
+
+    final normalizedId = authorId.toString();
+    final normalizedName = legacyAuthorName?.trim();
+    if (normalizedName != null && normalizedName.isNotEmpty) {
+      return User(id: normalizedId, name: normalizedName);
+    }
+
+    if (normalizedId == 'user:spark' || authorType == 'mogo') {
+      return const User(id: 'user:spark', name: 'Spark');
+    }
+    if (normalizedId == 'current_user') {
+      return const User(id: 'current_user', name: 'You');
+    }
+
+    return User(id: normalizedId, name: 'User #$normalizedId');
   }
 
   static ActivityAction _parseAction(String? actionName, ActivityType type) {

@@ -18,9 +18,8 @@ class Environment {
   static const prod = 'PROD';
   static const dev = 'DEV';
   static const design = 'DESIGN';
-  static const devApiBaseUrl = 'https://task-mcp-cli-tool-surreal.onrender.com';
-  static const prodApiBaseUrl =
-      'https://task-mcp-cli-tool-surreal.onrender.com';
+  static const devApiBaseUrl = 'https://backend-coolmogo-ai.onrender.com';
+  static const prodApiBaseUrl = 'https://backend-coolmogo-ai.onrender.com';
 
   static final Environment _instance = Environment._();
 

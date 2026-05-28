@@ -227,11 +227,7 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
       );
 
       final service = ref.read(taskServiceProvider);
-      final persistedTask = await service.updateTask(
-        updatedTask,
-        clearDueDate: clearDueDate,
-        clearAssignee: clearAssignee,
-      );
+      final persistedTask = await service.updateTask(updatedTask);
       final activities = Environment().config.useMockData
           ? internalAuditTrail
           : await service.loadTaskActivity(taskId);

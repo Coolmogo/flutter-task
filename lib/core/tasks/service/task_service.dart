@@ -13,11 +13,7 @@ import 'package:task_manager_flutter/environment/environment.dart';
 abstract class TaskService {
   Future<List<Task>> loadTasks();
   Future<Task> createTask(Task task);
-  Future<Task> updateTask(
-    Task task, {
-    bool clearDueDate = false,
-    bool clearAssignee = false,
-  });
+  Future<Task> updateTask(Task task);
   Future<void> deleteTask(String taskId);
   Future<List<ActivityLog>> loadTaskActivity(String taskId);
   Future<ActivityLog> addComment(String taskId, String text);
@@ -55,13 +51,11 @@ class LocalTaskService implements TaskService {
   }
 
   @override
-  Future<Task> updateTask(
-    Task task, {
-    bool clearDueDate = false,
-    bool clearAssignee = false,
-  }) async {
+  Future<Task> updateTask(Task task) async {
     final tasks = await loadTasks();
-    final updated = tasks.map((item) => item.id == task.id ? task : item).toList();
+    final updated = tasks
+        .map((item) => item.id == task.id ? task : item)
+        .toList();
     await _saveAllTasks(updated);
     return task;
   }
@@ -122,10 +116,7 @@ class HttpTaskService implements TaskService {
   final Dio _dio;
 
   HttpTaskService({required String apiBaseUrl, required Ref ref})
-    : _dio = buildHttpClient(
-        baseUrl: '$apiBaseUrl/tasks',
-        ref: ref,
-      );
+    : _dio = buildHttpClient(baseUrl: '$apiBaseUrl/tasks', ref: ref);
 
   @override
   Future<List<Task>> loadTasks() async {
@@ -137,17 +128,15 @@ class HttpTaskService implements TaskService {
         throw ApiException.invalidResponse('The tasks response was empty.');
       }
 
-      return data
-          .map((item) {
-            if (item is! Map<String, dynamic>) {
-              throw ApiException.invalidResponse(
-                'Each task item must be a JSON object.',
-              );
-            }
+      return data.map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw ApiException.invalidResponse(
+            'Each task item must be a JSON object.',
+          );
+        }
 
-            return Task.fromBackendJson(item);
-          })
-          .toList();
+        return Task.fromBackendJson(item);
+      }).toList();
     } on DioException catch (error) {
       final apiError = error.error;
       if (apiError is ApiException) {
@@ -164,29 +153,17 @@ class HttpTaskService implements TaskService {
 
   @override
   Future<Task> createTask(Task task) async {
-    final assigneeId = _parseOptionalInt(
-      value: task.assignee?.id,
-      fieldName: 'assignee',
-      message:
-          'Assignee editing needs backend user ids before it can be saved.',
-    );
-
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         '',
-        data: {
-          'title': task.title,
-          'description': task.description,
-          'status': Task.backendStatusFromUi(task.status),
-          'assignee_id': assigneeId,
-          'stage_id': task.stageId,
-          'due': task.dueDate == null ? null : _formatDate(task.dueDate!),
-        },
+        data: _buildTaskPayload(task),
       );
 
       final data = response.data;
       if (data == null) {
-        throw ApiException.invalidResponse('The task create response was empty.');
+        throw ApiException.invalidResponse(
+          'The task create response was empty.',
+        );
       }
 
       return Task.fromBackendJson(data);
@@ -205,43 +182,23 @@ class HttpTaskService implements TaskService {
   }
 
   @override
-  Future<Task> updateTask(
-    Task task, {
-    bool clearDueDate = false,
-    bool clearAssignee = false,
-  }) async {
+  Future<Task> updateTask(Task task) async {
     final taskId = task.id.trim();
     if (taskId.isEmpty) {
       throw const ApiException('Task id is required for backend updates.');
     }
 
-    final assigneeId = clearAssignee
-        ? null
-        : _parseOptionalInt(
-            value: task.assignee?.id,
-            fieldName: 'assignee',
-            message:
-                'Assignee editing needs backend user ids before it can be saved.',
-          );
-
     try {
       final response = await _dio.patch<Map<String, dynamic>>(
         _taskPath(taskId),
-        data: {
-          'title': task.title,
-          'description': task.description,
-          'status': Task.backendStatusFromUi(task.status),
-          'assignee_id': assigneeId,
-          'stage_id': task.stageId,
-          'due': clearDueDate
-              ? null
-              : (task.dueDate == null ? null : _formatDate(task.dueDate!)),
-        },
+        data: _buildTaskPayload(task),
       );
 
       final data = response.data;
       if (data == null) {
-        throw ApiException.invalidResponse('The task update response was empty.');
+        throw ApiException.invalidResponse(
+          'The task update response was empty.',
+        );
       }
 
       return Task.fromBackendJson(data);
@@ -328,12 +285,17 @@ class HttpTaskService implements TaskService {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         _taskPath(normalizedTaskId, 'comments'),
-        data: {'text': text},
+        data: {'content': text},
       );
 
       final data = response.data;
       if (data == null) {
         throw ApiException.invalidResponse('The comment response was empty.');
+      }
+
+      final userComment = data['user_comment'];
+      if (userComment is Map<String, dynamic>) {
+        return ActivityLog.fromBackendCommentJson(userComment);
       }
 
       return ActivityLog.fromBackendCommentJson(data);
@@ -351,24 +313,28 @@ class HttpTaskService implements TaskService {
     }
   }
 
-  int? _parseOptionalInt({
-    required String? value,
-    required String fieldName,
-    required String message,
-  }) {
+  String? _parseOptionalId(String? value) {
     if (value == null || value.trim().isEmpty) {
       return null;
     }
-
-    final parsed = int.tryParse(value);
-    if (parsed == null) {
-      throw ApiException('$message Missing $fieldName id.');
-    }
-    return parsed;
+    return value.trim();
   }
 
   String _formatDate(DateTime value) {
     return value.toIso8601String().split('T').first;
+  }
+
+  Map<String, Object?> _buildTaskPayload(Task task) {
+    final assigneeId = _parseOptionalId(task.assignee?.id);
+
+    return {
+      'title': task.title,
+      'description': task.description,
+      'status': Task.backendStatusFromUi(task.status),
+      'assignee_id': assigneeId,
+      'stage_id': task.stageId,
+      'due': task.dueDate == null ? null : _formatDate(task.dueDate!),
+    };
   }
 
   String _taskPath(String taskId, [String? suffix]) {

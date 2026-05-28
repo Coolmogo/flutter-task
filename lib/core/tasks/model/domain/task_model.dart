@@ -96,7 +96,8 @@ class Task {
       ),
       projectId: projectId,
       stageId: json['stageId'] as String?,
-      activities: (json['activities'] as List<dynamic>?)
+      activities:
+          (json['activities'] as List<dynamic>?)
               ?.map((e) => ActivityLog.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -114,9 +115,12 @@ class Task {
     if (assigneeJson is Map<String, dynamic>) {
       assignee = User.fromJson(assigneeJson);
     } else if (assigneeIdValue != null) {
+      final normalizedAssigneeId = assigneeIdValue.toString();
       assignee = User(
-        id: assigneeIdValue.toString(),
-        name: 'User #${assigneeIdValue.toString()}',
+        id: normalizedAssigneeId,
+        name: normalizedAssigneeId == 'user:spark'
+            ? 'Spark'
+            : 'User #$normalizedAssigneeId',
       );
     }
 
@@ -124,9 +128,7 @@ class Task {
       id: json['id'].toString(),
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,
-      dueDate: dueValue != null
-          ? DateTime.parse(dueValue as String)
-          : null,
+      dueDate: dueValue != null ? DateTime.parse(dueValue as String) : null,
       assignee: assignee,
       status: (json['status'] as String?) ?? 'To Do',
       source: projectIdValue != null ? TaskSource.project : TaskSource.issue,

@@ -27,6 +27,8 @@ class TaskDetailDrawer extends ConsumerStatefulWidget {
 }
 
 class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
+  static const User _sparkUser = User(id: 'user:spark', name: 'Spark');
+
   late TextEditingController _titleController;
   late TextEditingController _descController;
   late TextEditingController _commentController;
@@ -432,9 +434,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                               _buildSidebarField(
                                 label: 'Assignee',
                                 child: InkWell(
-                                  onTap: Environment().config.useMockData
-                                      ? () => _showAssigneePicker(context)
-                                      : null,
+                                  onTap: () => _showAssigneePicker(context),
                                   borderRadius: BorderRadius.circular(6),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -484,9 +484,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            Environment().config.useMockData
-                                                ? 'Assign task'
-                                                : 'User integration pending',
+                                            'Assign task',
                                             style: TextStyle(
                                               color: AppTheme.textSecondary,
                                               fontSize: 12,
@@ -565,10 +563,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => _cancelChanges(task),
-                icon: const Icon(
-                  LucideIcons.x,
-                  color: AppTheme.textPrimary,
-                ),
+                icon: const Icon(LucideIcons.x, color: AppTheme.textPrimary),
               ),
             ],
           ),
@@ -891,9 +886,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   }
 
   void _showAssigneePicker(BuildContext context) {
-    if (!Environment().config.useMockData) {
-      return;
-    }
     final teamAsync = ref.read(teamProvider);
 
     showDialog(
@@ -928,69 +920,75 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                 style: const TextStyle(color: Colors.redAccent),
               ),
             ),
-            data: (team) => ListView.builder(
-              shrinkWrap: true,
-              itemCount: team.length + 1,
-              itemBuilder: (context, index) {
-                if (index == team.length) {
+            data: (team) {
+              final assignees = [
+                ...team,
+                if (!team.any((user) => user.id == _sparkUser.id)) _sparkUser,
+              ];
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: assignees.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == assignees.length) {
+                    return ListTile(
+                      leading: const Icon(
+                        LucideIcons.userMinus,
+                        color: Colors.redAccent,
+                      ),
+                      title: const Text(
+                        'Unassigned',
+                        style: TextStyle(color: AppTheme.textPrimary),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _selectedAssignee = null;
+                          _shouldClearAssignee = true;
+                          _hasChanges = true;
+                        });
+                        Navigator.pop(context);
+                      },
+                    );
+                  }
+
+                  final user = assignees[index];
                   return ListTile(
-                    leading: const Icon(
-                      LucideIcons.userMinus,
-                      color: Colors.redAccent,
+                    leading: CircleAvatar(
+                      backgroundColor: AppTheme.primary.withOpacity(0.2),
+                      child: Text(
+                        user.name[0].toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    title: const Text(
-                      'Unassigned',
-                      style: TextStyle(color: AppTheme.textPrimary),
+                    title: Text(
+                      user.name,
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: Text(
+                      user.email ?? '',
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                     onTap: () {
                       setState(() {
-                        _selectedAssignee = null;
-                        _shouldClearAssignee = true;
+                        _selectedAssignee = user;
+                        _shouldClearAssignee = false;
                         _hasChanges = true;
                       });
                       Navigator.pop(context);
                     },
                   );
-                }
-
-                final user = team[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppTheme.primary.withOpacity(0.2),
-                    child: Text(
-                      user.name[0].toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    user.name,
-                    style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  subtitle: Text(
-                    user.email ?? '',
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  onTap: () {
-                    setState(() {
-                      _selectedAssignee = user;
-                      _shouldClearAssignee = false;
-                      _hasChanges = true;
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            ),
+                },
+              );
+            },
           ),
         ),
       ),
